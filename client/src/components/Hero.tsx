@@ -4,7 +4,7 @@ export function Hero() {
   return (
     <section className="relative h-[70vh] md:h-[80vh] w-full overflow-hidden bg-[#7a9d0f]">
       {/* Minimal pattern background */}
-      <div className="absolute inset-0 hero-pattern opacity-10"></div>
+      <div className="absolute inset-0 hero-pattern opacity-30"></div>
       
       <div className="absolute inset-0 flex items-center justify-center">
         <img 
