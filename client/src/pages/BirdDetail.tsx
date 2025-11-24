@@ -47,11 +47,11 @@ export default function BirdDetail() {
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
           <div className="lg:col-span-3">
-            <div className="bg-card rounded-lg p-12 aspect-square flex items-center justify-center relative overflow-hidden">
+            <div className="bg-card rounded-lg p-12 aspect-square flex items-center justify-center relative overflow-visible">
               <img
                 src={bird.image}
                 alt={bird.name}
-                className="max-w-full max-h-full object-contain animate-float"
+                className="max-w-full max-h-full object-contain animate-3d-flight"
                 data-testid={`img-bird-detail-${bird.id}`}
               />
             </div>

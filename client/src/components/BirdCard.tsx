@@ -15,7 +15,7 @@ export function BirdCard({ bird }: BirdCardProps) {
           <img
             src={bird.image}
             alt={bird.name}
-            className="w-full h-full object-contain p-6 group-hover:animate-bounce-subtle"
+            className="w-full h-full object-contain p-6 bird-card-image"
             data-testid={`img-bird-${bird.id}`}
           />
           
