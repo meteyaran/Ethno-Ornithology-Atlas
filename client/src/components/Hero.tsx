@@ -3,14 +3,14 @@ import heroImg from "@assets/generated_images/impressionist_bird_in_flight_hero.
 export function Hero() {
   return (
     <section className="relative h-[70vh] md:h-[80vh] w-full overflow-hidden bg-[#7a9d0f]">
-      {/* Minimal pattern background */}
-      <div className="absolute inset-0 hero-pattern opacity-30"></div>
+      {/* Minimal pattern background - behind the bird */}
+      <div className="absolute inset-0 hero-pattern opacity-50"></div>
       
       <div className="absolute inset-0 flex items-center justify-center">
         <img 
           src={heroImg} 
           alt="Uçan Kuş" 
-          className="w-full h-full object-cover opacity-90"
+          className="w-full h-full object-cover opacity-85"
         />
       </div>
       
