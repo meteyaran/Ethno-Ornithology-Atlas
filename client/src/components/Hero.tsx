@@ -2,7 +2,7 @@ import heroImg from "@assets/generated_images/impressionist_bird_in_flight_hero.
 
 export function Hero() {
   return (
-    <section className="relative h-[70vh] md:h-[80vh] w-full overflow-hidden bg-[#66800b]">
+    <section className="relative h-[70vh] md:h-[80vh] w-full overflow-hidden bg-[#7a9d0f]">
       <div className="absolute inset-0 flex items-center justify-center">
         <img 
           src={heroImg} 
@@ -11,7 +11,7 @@ export function Hero() {
         />
       </div>
       
-      <div className="absolute inset-0 bg-gradient-to-b from-[#66800b]/20 via-transparent to-background/40" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#7a9d0f]/20 via-transparent to-background/40" />
       
       <div className="relative h-full flex flex-col items-center justify-end px-6 pb-16 text-center">
         <div className="max-w-4xl">
