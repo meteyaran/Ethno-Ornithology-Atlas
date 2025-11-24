@@ -3,6 +3,7 @@ import { birds } from "@/data/birds";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MapPin, Ruler, Palette, ChevronLeft, ChevronRight } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { BirdSoundPlayer } from "@/components/BirdSoundPlayer";
 import { useEffect } from "react";
 
 export default function BirdDetail() {
@@ -71,6 +72,11 @@ export default function BirdDetail() {
             </div>
 
             <div className="space-y-6">
+              <BirdSoundPlayer 
+                scientificName={bird.scientificName} 
+                birdName={bird.name}
+              />
+
               <div className="flex items-start gap-4">
                 <div className="bg-primary/10 p-3 rounded-md">
                   <MapPin className="h-5 w-5 text-primary" />
