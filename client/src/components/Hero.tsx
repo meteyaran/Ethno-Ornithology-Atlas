@@ -1,4 +1,4 @@
-import heroImg from "@assets/generated_images/high_resolution_hero_bird_illustration.png";
+import heroImg from "@assets/generated_images/impressionist_bird_in_flight_hero.png";
 
 export function Hero() {
   return (
