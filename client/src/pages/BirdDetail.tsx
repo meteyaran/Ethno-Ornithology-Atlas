@@ -47,7 +47,7 @@ export default function BirdDetail() {
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
           <div className="lg:col-span-3">
-            <div className="bg-card rounded-lg p-12 aspect-square flex items-center justify-center relative overflow-visible">
+            <div className="bg-card rounded-lg p-12 aspect-square flex items-center justify-center relative overflow-visible detail-card-3d">
               <img
                 src={bird.image}
                 alt={bird.name}

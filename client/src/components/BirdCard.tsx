@@ -10,12 +10,12 @@ interface BirdCardProps {
 export function BirdCard({ bird }: BirdCardProps) {
   return (
     <Link href={`/bird/${bird.id}`} data-testid={`link-bird-${bird.id}`}>
-      <Card className="overflow-hidden cursor-pointer group hover-elevate active-elevate-2 transition-transform duration-300 hover:scale-105">
-        <div className="aspect-[3/4] relative bg-card">
+      <Card className="overflow-visible cursor-pointer group transition-all duration-500 card-3d">
+        <div className="aspect-[3/4] relative bg-card rounded-lg overflow-hidden">
           <img
             src={bird.image}
             alt={bird.name}
-            className="w-full h-full object-contain p-6 bird-card-image"
+            className="w-full h-full object-contain p-6 bird-card-image transition-transform duration-500"
             data-testid={`img-bird-${bird.id}`}
           />
           
