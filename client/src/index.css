@@ -206,14 +206,26 @@
   0% {
     transform: perspective(1200px) rotateY(0deg) rotateX(0deg) translateY(0) translateZ(0);
   }
+  12.5% {
+    transform: perspective(1200px) rotateY(8deg) rotateX(3deg) translateY(-6px) translateZ(15px);
+  }
   25% {
-    transform: perspective(1200px) rotateY(15deg) rotateX(5deg) translateY(-12px) translateZ(30px);
+    transform: perspective(1200px) rotateY(12deg) rotateX(4deg) translateY(-10px) translateZ(25px);
+  }
+  37.5% {
+    transform: perspective(1200px) rotateY(8deg) rotateX(3deg) translateY(-14px) translateZ(35px);
   }
   50% {
-    transform: perspective(1200px) rotateY(0deg) rotateX(0deg) translateY(-20px) translateZ(50px);
+    transform: perspective(1200px) rotateY(0deg) rotateX(0deg) translateY(-16px) translateZ(40px);
+  }
+  62.5% {
+    transform: perspective(1200px) rotateY(-8deg) rotateX(-3deg) translateY(-14px) translateZ(35px);
   }
   75% {
-    transform: perspective(1200px) rotateY(-15deg) rotateX(-5deg) translateY(-12px) translateZ(30px);
+    transform: perspective(1200px) rotateY(-12deg) rotateX(-4deg) translateY(-10px) translateZ(25px);
+  }
+  87.5% {
+    transform: perspective(1200px) rotateY(-8deg) rotateX(-3deg) translateY(-6px) translateZ(15px);
   }
   100% {
     transform: perspective(1200px) rotateY(0deg) rotateX(0deg) translateY(0) translateZ(0);
@@ -229,7 +241,7 @@
 }
 
 .animate-3d-flight {
-  animation: rotate3d 6s ease-in-out infinite;
+  animation: rotate3d 10s linear infinite;
   transform-style: preserve-3d;
 }
 
@@ -239,7 +251,7 @@
 }
 
 .group:hover .bird-card-image {
-  animation: rotate3d 6s ease-in-out infinite;
+  animation: rotate3d 10s linear infinite;
 }
 
 /* Minimal pattern background for hero - inspired by minimal sigils/symbols */
