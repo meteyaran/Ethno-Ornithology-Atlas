@@ -204,19 +204,19 @@
 
 @keyframes rotate3d {
   0% {
-    transform: perspective(1000px) rotateY(0deg) translateY(0);
+    transform: perspective(1200px) rotateY(0deg) rotateX(0deg) translateY(0) translateZ(0);
   }
   25% {
-    transform: perspective(1000px) rotateY(10deg) translateY(-8px);
+    transform: perspective(1200px) rotateY(15deg) rotateX(5deg) translateY(-12px) translateZ(30px);
   }
   50% {
-    transform: perspective(1000px) rotateY(0deg) translateY(-15px);
+    transform: perspective(1200px) rotateY(0deg) rotateX(0deg) translateY(-20px) translateZ(50px);
   }
   75% {
-    transform: perspective(1000px) rotateY(-10deg) translateY(-8px);
+    transform: perspective(1200px) rotateY(-15deg) rotateX(-5deg) translateY(-12px) translateZ(30px);
   }
   100% {
-    transform: perspective(1000px) rotateY(0deg) translateY(0);
+    transform: perspective(1200px) rotateY(0deg) rotateX(0deg) translateY(0) translateZ(0);
   }
 }
 
