@@ -1,4 +1,3 @@
-// todo: remove mock functionality - This is mock data for design prototype
 export interface Bird {
   id: string;
   name: string;
