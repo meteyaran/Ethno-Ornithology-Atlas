@@ -235,6 +235,237 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ results });
   });
 
+  // eBird API - Get recent observations of a species globally or by region
+  app.get("/api/ebird/observations/:speciesCode", async (req, res) => {
+    try {
+      const { speciesCode } = req.params;
+      const { regionCode, back, maxResults } = req.query;
+      const apiKey = process.env.EBIRD_API_KEY;
+      
+      if (!apiKey) {
+        return res.status(500).json({ error: "eBird API key not configured" });
+      }
+      
+      // Build the API URL - if regionCode provided, use region endpoint
+      let apiUrl: string;
+      const params = new URLSearchParams();
+      if (back) params.append('back', String(back));
+      if (maxResults) params.append('maxResults', String(maxResults));
+      
+      if (regionCode && typeof regionCode === 'string') {
+        // Get recent observations of a species in a specific region
+        apiUrl = `https://api.ebird.org/v2/data/obs/${regionCode}/recent/${speciesCode}?${params.toString()}`;
+      } else {
+        // Get recent observations near coordinates (we'll use multiple regions)
+        // For global view, we query multiple large regions
+        apiUrl = `https://api.ebird.org/v2/data/obs/world/recent/${speciesCode}?${params.toString()}`;
+      }
+      
+      console.log("Fetching eBird observations for:", speciesCode);
+      
+      const response = await fetch(apiUrl, {
+        headers: {
+          'X-eBirdApiToken': apiKey,
+          'Accept': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        const text = await response.text();
+        console.error("eBird API error:", response.status, text);
+        return res.status(response.status).json({ error: "eBird API error", details: text });
+      }
+      
+      const data = await response.json();
+      res.json({ observations: data, count: data.length });
+    } catch (error) {
+      console.error("Error fetching eBird observations:", error);
+      res.status(500).json({ error: "Internal server error", message: String(error) });
+    }
+  });
+
+  // eBird API - Get recent observations near a location
+  app.get("/api/ebird/nearby", async (req, res) => {
+    try {
+      const { lat, lng, dist, speciesCode, back } = req.query;
+      const apiKey = process.env.EBIRD_API_KEY;
+      
+      if (!apiKey) {
+        return res.status(500).json({ error: "eBird API key not configured" });
+      }
+      
+      if (!lat || !lng) {
+        return res.status(400).json({ error: "Latitude and longitude required" });
+      }
+      
+      const params = new URLSearchParams({
+        lat: String(lat),
+        lng: String(lng),
+        dist: String(dist || 50),
+        back: String(back || 30)
+      });
+      
+      let apiUrl: string;
+      if (speciesCode && typeof speciesCode === 'string') {
+        apiUrl = `https://api.ebird.org/v2/data/obs/geo/recent/${speciesCode}?${params.toString()}`;
+      } else {
+        apiUrl = `https://api.ebird.org/v2/data/obs/geo/recent?${params.toString()}`;
+      }
+      
+      console.log("Fetching nearby eBird observations:", apiUrl);
+      
+      const response = await fetch(apiUrl, {
+        headers: {
+          'X-eBirdApiToken': apiKey,
+          'Accept': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        const text = await response.text();
+        console.error("eBird API error:", response.status, text);
+        return res.status(response.status).json({ error: "eBird API error", details: text });
+      }
+      
+      const data = await response.json();
+      res.json({ observations: data, count: data.length });
+    } catch (error) {
+      console.error("Error fetching nearby observations:", error);
+      res.status(500).json({ error: "Internal server error", message: String(error) });
+    }
+  });
+
+  // eBird API - Get species code from scientific name
+  app.get("/api/ebird/taxonomy", async (req, res) => {
+    try {
+      const { scientificName, speciesCode } = req.query;
+      const apiKey = process.env.EBIRD_API_KEY;
+      
+      if (!apiKey) {
+        return res.status(500).json({ error: "eBird API key not configured" });
+      }
+      
+      // Get full taxonomy to find species code
+      const apiUrl = 'https://api.ebird.org/v2/ref/taxonomy/ebird?fmt=json';
+      
+      const response = await fetch(apiUrl, {
+        headers: {
+          'X-eBirdApiToken': apiKey,
+          'Accept': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        return res.status(response.status).json({ error: "eBird taxonomy API error" });
+      }
+      
+      const data = await response.json();
+      
+      // Search for the species
+      let result = null;
+      if (scientificName && typeof scientificName === 'string') {
+        result = data.find((sp: any) => 
+          sp.sciName?.toLowerCase() === scientificName.toLowerCase()
+        );
+      } else if (speciesCode && typeof speciesCode === 'string') {
+        result = data.find((sp: any) => 
+          sp.speciesCode?.toLowerCase() === speciesCode.toLowerCase()
+        );
+      }
+      
+      if (result) {
+        res.json({ species: result });
+      } else {
+        res.status(404).json({ error: "Species not found" });
+      }
+    } catch (error) {
+      console.error("Error fetching taxonomy:", error);
+      res.status(500).json({ error: "Internal server error", message: String(error) });
+    }
+  });
+
+  // eBird API - Get observations for multiple regions (for world map)
+  app.get("/api/ebird/global/:speciesCode", async (req, res) => {
+    try {
+      const { speciesCode } = req.params;
+      const { back } = req.query;
+      const apiKey = process.env.EBIRD_API_KEY;
+      
+      if (!apiKey) {
+        return res.status(500).json({ error: "eBird API key not configured" });
+      }
+      
+      // Query multiple major regions for global coverage
+      const regions = [
+        'NA', // North America
+        'SA', // South America
+        'EU', // Europe (unofficial - will use country codes)
+        'AF', // Africa
+        'AS', // Asia
+        'OC', // Oceania
+      ];
+      
+      // For eBird, we need to use country codes
+      // We'll query major countries from each continent
+      const countries = [
+        'US', 'CA', 'MX', // North America
+        'BR', 'AR', 'CO', 'PE', 'CL', // South America
+        'GB', 'DE', 'FR', 'ES', 'IT', 'PL', 'TR', 'RU', // Europe
+        'ZA', 'KE', 'EG', 'NG', 'MA', // Africa
+        'CN', 'IN', 'JP', 'KR', 'TH', 'ID', 'PH', 'AU', 'NZ', // Asia-Pacific
+      ];
+      
+      const backDays = back ? String(back) : '30';
+      
+      console.log("Fetching global eBird observations for:", speciesCode);
+      
+      // Fetch observations from multiple countries in parallel
+      const requests = countries.map(async (country) => {
+        try {
+          const apiUrl = `https://api.ebird.org/v2/data/obs/${country}/recent/${speciesCode}?back=${backDays}&maxResults=100`;
+          const response = await fetch(apiUrl, {
+            headers: {
+              'X-eBirdApiToken': apiKey,
+              'Accept': 'application/json'
+            }
+          });
+          
+          if (response.ok) {
+            return await response.json();
+          }
+          return [];
+        } catch {
+          return [];
+        }
+      });
+      
+      const results = await Promise.all(requests);
+      const allObservations = results.flat();
+      
+      // Remove duplicates based on location
+      const uniqueLocations = new Map();
+      allObservations.forEach((obs: any) => {
+        const key = `${obs.lat}-${obs.lng}`;
+        if (!uniqueLocations.has(key)) {
+          uniqueLocations.set(key, obs);
+        }
+      });
+      
+      const observations = Array.from(uniqueLocations.values());
+      
+      console.log(`Found ${observations.length} unique observation locations for ${speciesCode}`);
+      
+      res.json({ 
+        observations, 
+        count: observations.length,
+        speciesCode 
+      });
+    } catch (error) {
+      console.error("Error fetching global observations:", error);
+      res.status(500).json({ error: "Internal server error", message: String(error) });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
