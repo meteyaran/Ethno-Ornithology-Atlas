@@ -74,7 +74,7 @@ export function stratifiedSplit(
   const validation: AudioSample[] = [];
   const test: AudioSample[] = [];
   
-  for (const [_, classSamples] of byClass) {
+  byClass.forEach((classSamples) => {
     const shuffled = [...classSamples].sort(() => Math.random() - 0.5);
     const trainEnd = Math.floor(shuffled.length * trainRatio);
     const validationEnd = trainEnd + Math.floor(shuffled.length * validationRatio);
@@ -82,7 +82,7 @@ export function stratifiedSplit(
     train.push(...shuffled.slice(0, trainEnd));
     validation.push(...shuffled.slice(trainEnd, validationEnd));
     test.push(...shuffled.slice(validationEnd));
-  }
+  });
   
   return { train, validation, test };
 }
@@ -221,7 +221,8 @@ export class DataGenerator {
     }
 
     const xs = tf.concat(spectrograms, 0) as tf.Tensor4D;
-    const ys = tf.tensor2d(labels);
+    const labelsArray = labels.map(l => Array.from(l));
+    const ys = tf.tensor2d(labelsArray);
 
     spectrograms.forEach(t => t.dispose());
 

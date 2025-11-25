@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/Home";
 import BirdDetail from "@/pages/BirdDetail";
+import SoundIdentifier from "@/pages/SoundIdentifier";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -12,6 +13,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/bird/:id" component={BirdDetail} />
+      <Route path="/identify" component={SoundIdentifier} />
       <Route component={NotFound} />
     </Switch>
   );

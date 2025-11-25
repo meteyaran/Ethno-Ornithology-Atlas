@@ -136,3 +136,33 @@ Preferred communication style: Simple, everyday language.
 - Static bird illustration images stored in attached_assets/generated_images/
 - Image paths imported as ES modules via Vite
 - Favicon and hero banner included
+
+### ML Bird Sound Identification System
+
+**Architecture (BirdNET/Merlin-style)**
+- TensorFlow.js for both training and inference
+- CNN-based classifier with depthwise separable convolutions
+- Mel spectrogram preprocessing (128 mel bands, 22.05 kHz)
+- 86 bird species classification
+
+**Server-side Components (server/ml/)**
+- `audioProcessor.ts`: Audio normalization, resampling, STFT, mel filterbank, spectrogram generation
+- `model.ts`: CNN architecture with Conv2D, BatchNorm, DepthwiseSeparable, GlobalAvgPool, Dense layers
+- `dataLoader.ts`: Stratified train/val/test split, data augmentation (time/freq masking, noise)
+- `training.ts`: Training loop with early stopping, metrics (accuracy, top-3), checkpointing
+- `prediction.ts`: Real-time inference with confidence scores
+
+**Frontend Components**
+- `useMicrophone.ts`: Web Audio API recording hook with live waveform capture
+- `SpectrogramVisualizer.tsx`: Canvas-based spectrogram visualization with color maps
+- `BirdSoundIdentifier.tsx`: Main UI with recording controls, live feedback, results display
+
+**API Endpoints**
+- `POST /api/identify-sound`: Process recorded audio, return predictions with confidence
+- `POST /api/generate-spectrogram`: Generate spectrogram from audio URL
+- `GET /api/ml/status`: Model status (loaded/demo mode, accuracy, classes)
+
+**Current Status**
+- Demo mode active (real training requires GPU and Xeno-canto dataset download)
+- Full pipeline code complete and functional
+- Model architecture ready for training with 86 bird species

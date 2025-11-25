@@ -68,7 +68,7 @@ export class EarlyStopping {
   private patience: number;
   private bestValue: number = -Infinity;
   private counter: number = 0;
-  private bestWeights: tf.NamedTensorMap | null = null;
+  private bestWeights: Map<string, tf.Tensor[]> = new Map();
 
   constructor(patience: number) {
     this.patience = patience;
@@ -78,10 +78,10 @@ export class EarlyStopping {
     if (currentValue > this.bestValue) {
       this.bestValue = currentValue;
       this.counter = 0;
-      this.bestWeights = {};
+      this.bestWeights.clear();
       for (const layer of model.layers) {
         const weights = layer.getWeights();
-        this.bestWeights[layer.name] = weights.map(w => w.clone());
+        this.bestWeights.set(layer.name, weights.map(w => w.clone()));
       }
       return false;
     }
@@ -91,24 +91,19 @@ export class EarlyStopping {
   }
 
   restoreBestWeights(model: tf.LayersModel): void {
-    if (this.bestWeights) {
-      for (const layer of model.layers) {
-        const savedWeights = this.bestWeights[layer.name];
-        if (savedWeights) {
-          layer.setWeights(savedWeights);
-        }
+    for (const layer of model.layers) {
+      const savedWeights = this.bestWeights.get(layer.name);
+      if (savedWeights) {
+        layer.setWeights(savedWeights);
       }
     }
   }
 
   dispose(): void {
-    if (this.bestWeights) {
-      for (const weights of Object.values(this.bestWeights)) {
-        if (Array.isArray(weights)) {
-          weights.forEach(w => w.dispose());
-        }
-      }
-    }
+    this.bestWeights.forEach((weights) => {
+      weights.forEach(w => w.dispose());
+    });
+    this.bestWeights.clear();
   }
 }
 

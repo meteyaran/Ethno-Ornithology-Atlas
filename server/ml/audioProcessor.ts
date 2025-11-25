@@ -208,7 +208,8 @@ export function normalizeSpectrogram(spectrogram: Float32Array[]): Float32Array[
   let globalMax = -Infinity;
   
   for (const frame of spectrogram) {
-    for (const val of frame) {
+    for (let i = 0; i < frame.length; i++) {
+      const val = frame[i];
       if (val < globalMin) globalMin = val;
       if (val > globalMax) globalMax = val;
     }
