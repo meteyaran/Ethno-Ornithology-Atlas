@@ -26,7 +26,7 @@ export function Hero() {
           <p className="text-white/95 text-base md:text-xl max-w-3xl mx-auto font-light leading-relaxed drop-shadow-lg">
             Kuşların izlenimlerini ve dilin izlerini aynı sayfada buluşturur. 
             Her kuş resmi bir kelimeye benzer; anlamı sabit değildir. 
-            Renkler ışıkla değişir, kelimeler bir bağlamda.
+            Renkler ışıkla değişir, kelimelerse bir bakışla.
           </p>
         </div>
       </div>
