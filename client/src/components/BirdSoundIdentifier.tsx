@@ -15,13 +15,15 @@ interface PredictionResult {
   birdName: string;
   scientificName: string;
   confidence: number;
-  rank: number;
+  label?: string;
 }
 
 interface IdentificationResponse {
   success: boolean;
   predictions: PredictionResult[];
   processingTime: number;
+  modelVersion?: string;
+  numSpecies?: number;
   spectrogram?: number[][];
   error?: string;
 }
@@ -31,7 +33,10 @@ interface MLStatus {
   trainingStatus: string;
   numClasses: number;
   accuracy: number;
+  modelVersion?: string;
+  source?: string;
   message: string;
+  error?: string;
 }
 
 type IdentificationPhase = 'idle' | 'recording' | 'processing' | 'results';
@@ -163,13 +168,15 @@ export function BirdSoundIdentifier() {
           {mlStatus && !mlStatus.modelLoaded && (
             <div className="mt-3 flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
               <Info className="w-4 h-4" />
-              <span>Demo modunda çalışıyor - Gerçek model eğitimi için GPU gerekli</span>
+              <span>{mlStatus.error || 'BirdNET modeli yükleniyor...'}</span>
             </div>
           )}
           {mlStatus && mlStatus.modelLoaded && (
             <div className="mt-3 flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
               <CheckCircle2 className="w-4 h-4" />
-              <span>Model hazır - Doğruluk: %{(mlStatus.accuracy * 100).toFixed(0)}</span>
+              <span>
+                {mlStatus.modelVersion || 'BirdNET V2.4'} hazır - {mlStatus.numClasses.toLocaleString()} tür destekleniyor
+              </span>
             </div>
           )}
         </CardHeader>
@@ -285,14 +292,14 @@ export function BirdSoundIdentifier() {
             )}
 
             <div className="space-y-3">
-              {results.predictions.map((prediction) => (
+              {results.predictions.map((prediction, index) => (
                 <div
                   key={prediction.birdId}
                   className="flex items-center gap-4 p-4 rounded-lg border bg-card hover-elevate transition-all"
-                  data-testid={`prediction-result-${prediction.rank}`}
+                  data-testid={`prediction-result-${index + 1}`}
                 >
                   <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold">
-                    {prediction.rank}
+                    {index + 1}
                   </div>
                   
                   <div className="flex-1">
@@ -327,13 +334,15 @@ export function BirdSoundIdentifier() {
 
             <div className="mt-6 p-4 bg-muted/50 rounded-lg">
               <div className="flex items-start gap-2">
-                <Volume2 className="w-5 h-5 text-muted-foreground mt-0.5" />
+                <Bird className="w-5 h-5 text-primary mt-0.5" />
                 <div className="text-sm text-muted-foreground">
-                  <p className="font-medium mb-1">Demo Modu</p>
+                  <p className="font-medium mb-1 text-foreground">
+                    {results.modelVersion || 'BirdNET V2.4'} - Cornell Lab of Ornithology
+                  </p>
                   <p>
-                    Bu sistem şu anda demo modunda çalışmaktadır. Gerçek kuş sesi tanımlama için
-                    modelin eğitilmesi gerekmektedir. Eğitim için Xeno-canto veritabanından
-                    86 kuş türüne ait binlerce ses kaydı kullanılabilir.
+                    Bu sistem BirdNET yapay zeka modelini kullanmaktadır. 
+                    Model dünya genelinde {results.numSpecies?.toLocaleString() || '6,522'} kuş türünü tanıyabilir.
+                    İşlem süresi: {results.processingTime}ms
                   </p>
                 </div>
               </div>

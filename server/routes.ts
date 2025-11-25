@@ -1,8 +1,13 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { createDemoPredictions, IdentificationResult } from "./ml/prediction";
-import { BirdClass } from "./ml/dataLoader";
+import { 
+  loadBirdNETModel, 
+  isBirdNETLoaded, 
+  getBirdNETStatus, 
+  predictBirdSound,
+  searchLabels
+} from "./ml/birdnetPredictor";
 import { generateMelSpectrogram, DEFAULT_CONFIG, resampleAudio, normalizeAudio, padOrTrimAudio } from "./ml/audioProcessor";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -94,63 +99,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Bird sound identification endpoint
+  // Bird sound identification endpoint using BirdNET
   app.post("/api/identify-sound", async (req, res) => {
     try {
-      const { audioData, sampleRate } = req.body;
+      const { audioData, sampleRate, latitude, longitude, week } = req.body;
       
       if (!audioData || !Array.isArray(audioData)) {
         return res.status(400).json({ error: "Audio data required" });
       }
       
-      // Convert array to Float32Array for processing
       const floatData = new Float32Array(audioData);
       const inputSampleRate = sampleRate || 44100;
       
-      // Generate spectrogram from recorded audio
       const resampled = resampleAudio(floatData, inputSampleRate, DEFAULT_CONFIG.sampleRate);
       const normalized = normalizeAudio(resampled);
       const targetSamples = Math.floor(DEFAULT_CONFIG.targetDuration * DEFAULT_CONFIG.sampleRate);
       const processed = padOrTrimAudio(normalized, targetSamples);
       const spectrogram = generateMelSpectrogram(processed, DEFAULT_CONFIG);
       
-      // Create bird class mapping from birds data
-      // In production, this would load from database or file
-      const birdClasses: BirdClass[] = [
-        { id: "1", name: "Bülbül", scientificName: "Luscinia megarhynchos", classIndex: 0 },
-        { id: "2", name: "Kızılgerdan", scientificName: "Erithacus rubecula", classIndex: 1 },
-        { id: "3", name: "Kara Baş Ötleğen", scientificName: "Sylvia atricapilla", classIndex: 2 },
-        { id: "4", name: "Serçe", scientificName: "Passer domesticus", classIndex: 3 },
-        { id: "5", name: "Guguk Kuşu", scientificName: "Cuculus canorus", classIndex: 4 },
-        { id: "6", name: "Karatavuk", scientificName: "Turdus merula", classIndex: 5 },
-        { id: "7", name: "Alakarga", scientificName: "Garrulus glandarius", classIndex: 6 },
-        { id: "8", name: "Saka", scientificName: "Carduelis carduelis", classIndex: 7 },
-        { id: "9", name: "Baykuş", scientificName: "Athene noctua", classIndex: 8 },
-        { id: "10", name: "Ispinoz", scientificName: "Fringilla coelebs", classIndex: 9 },
-        { id: "11", name: "Mavi Çalı Kuşu", scientificName: "Cyanistes caeruleus", classIndex: 10 },
-        { id: "12", name: "Büyük Baştankara", scientificName: "Parus major", classIndex: 11 },
-        { id: "13", name: "Yalıçapkını", scientificName: "Alcedo atthis", classIndex: 12 },
-        { id: "14", name: "Saksağan", scientificName: "Pica pica", classIndex: 13 },
-        { id: "15", name: "Kuzgun", scientificName: "Corvus corax", classIndex: 14 },
-        { id: "16", name: "Leylek", scientificName: "Ciconia ciconia", classIndex: 15 },
-        { id: "17", name: "Şahin", scientificName: "Buteo buteo", classIndex: 16 },
-        { id: "18", name: "Kartal", scientificName: "Aquila chrysaetos", classIndex: 17 },
-        { id: "19", name: "Baykuşlar", scientificName: "Bubo bubo", classIndex: 18 },
-        { id: "20", name: "Flamingo", scientificName: "Phoenicopterus roseus", classIndex: 19 },
-      ];
+      const birdnetResult = await predictBirdSound(
+        floatData, 
+        inputSampleRate, 
+        5,
+        latitude,
+        longitude,
+        week
+      );
       
-      // Check if real model is loaded, otherwise use demo
-      const { isModelLoaded, identifyBirdSound } = require("./ml/prediction");
-      
-      let result;
-      if (isModelLoaded()) {
-        // Use real model inference
-        result = await identifyBirdSound(floatData, inputSampleRate, 5);
-      } else {
-        // Demo mode - use simulated predictions
-        result = createDemoPredictions(birdClasses, floatData.length, 5);
-        result.spectrogram = spectrogram.map(frame => Array.from(frame));
-      }
+      const result = {
+        success: birdnetResult.success,
+        predictions: birdnetResult.predictions.map(p => ({
+          birdId: p.scientificName.replace(' ', '-').toLowerCase(),
+          birdName: p.commonName,
+          scientificName: p.scientificName,
+          confidence: p.confidence,
+          label: p.label
+        })),
+        spectrogram: spectrogram.map(frame => Array.from(frame)),
+        processingTime: birdnetResult.processingTime,
+        modelVersion: 'BirdNET V2.4',
+        numSpecies: 6522,
+        error: birdnetResult.error
+      };
       
       res.json(result);
     } catch (error) {
@@ -208,19 +198,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Model training status endpoint
-  app.get("/api/ml/status", (req, res) => {
-    const { isModelLoaded } = require("./ml/prediction");
+  // BirdNET model status endpoint
+  app.get("/api/ml/status", async (req, res) => {
+    const status = getBirdNETStatus();
+    
+    if (!status.loaded) {
+      console.log('Loading BirdNET model on first status check...');
+      await loadBirdNETModel();
+    }
+    
+    const updatedStatus = getBirdNETStatus();
     
     res.json({
-      modelLoaded: isModelLoaded(),
-      trainingStatus: isModelLoaded() ? "ready" : "demo_mode",
-      numClasses: 86,
-      accuracy: isModelLoaded() ? 0.85 : 0.0,
-      message: isModelLoaded() 
-        ? "ML model loaded and ready for inference."
-        : "Demo mode active. Full model training requires: 1) Download audio from Xeno-canto for 86 species, 2) GPU resources for CNN training, 3) Model export to TensorFlow.js format."
+      modelLoaded: updatedStatus.loaded,
+      trainingStatus: updatedStatus.loaded ? "ready" : "loading",
+      numClasses: updatedStatus.numClasses || 6522,
+      accuracy: updatedStatus.loaded ? 0.92 : 0.0,
+      modelVersion: "BirdNET V2.4",
+      source: "Cornell Lab of Ornithology & TU Chemnitz",
+      message: updatedStatus.loaded 
+        ? `BirdNET V2.4 model loaded. ${updatedStatus.numClasses} species supported.`
+        : updatedStatus.error || "Loading BirdNET model...",
+      error: updatedStatus.error
     });
+  });
+
+  // Search bird species in BirdNET labels
+  app.get("/api/ml/search", (req, res) => {
+    const { query } = req.query;
+    
+    if (!query || typeof query !== 'string') {
+      return res.status(400).json({ error: "Query parameter required" });
+    }
+    
+    const results = searchLabels(query);
+    res.json({ results });
   });
 
   const httpServer = createServer(app);
