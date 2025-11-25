@@ -415,6 +415,54 @@ export function BirdDistributionMap({
             </div>
           ) : (
             <div className="space-y-2">
+              <div className="flex flex-wrap gap-1">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-6 text-xs px-2"
+                  onClick={() => { setStartYear('1900'); setEndYear(String(currentYear)); setStartMonth('1'); setEndMonth('12'); }}
+                  data-testid="button-preset-all-years"
+                >
+                  Tüm Yıllar
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-6 text-xs px-2"
+                  onClick={() => { setStartYear(String(currentYear - 10)); setEndYear(String(currentYear)); }}
+                  data-testid="button-preset-10-years"
+                >
+                  Son 10 Yıl
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-6 text-xs px-2"
+                  onClick={() => { setStartYear(String(currentYear - 5)); setEndYear(String(currentYear)); }}
+                  data-testid="button-preset-5-years"
+                >
+                  Son 5 Yıl
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-6 text-xs px-2"
+                  onClick={() => { setStartMonth('3'); setEndMonth('5'); }}
+                  data-testid="button-preset-spring"
+                >
+                  İlkbahar
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-6 text-xs px-2"
+                  onClick={() => { setStartMonth('9'); setEndMonth('11'); }}
+                  data-testid="button-preset-autumn"
+                >
+                  Sonbahar
+                </Button>
+              </div>
+              
               <div className="flex items-center gap-2">
                 <div className="flex-1">
                   <label className="text-xs text-muted-foreground mb-1 block">Başlangıç Yılı</label>
