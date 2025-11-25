@@ -16,6 +16,7 @@ export default function Distribution() {
   const [speciesCode, setSpeciesCode] = useState<string | null>(null);
   const [loadingSpeciesCode, setLoadingSpeciesCode] = useState(false);
   const [speciesCodeError, setSpeciesCodeError] = useState<string | null>(null);
+  const [timeRangeLabel, setTimeRangeLabel] = useState('Son 30 gün');
   
   const filteredBirds = useMemo(() => {
     if (!searchTerm) return birds;
@@ -168,6 +169,7 @@ export default function Distribution() {
                 scientificName={selectedBird.scientificName}
                 birdName={selectedBird.name}
                 onObservationsLoaded={setObservationCount}
+                onTimeRangeChange={setTimeRangeLabel}
               />
             ) : selectedBird && loadingSpeciesCode ? (
               <Card className="h-[580px]">
@@ -250,7 +252,7 @@ export default function Distribution() {
                     </div>
                     <div className="text-right">
                       <p className="text-2xl font-bold text-primary">{observationCount}</p>
-                      <p className="text-sm text-muted-foreground">son 30 gün gözlem</p>
+                      <p className="text-sm text-muted-foreground">{timeRangeLabel.toLowerCase()} gözlem</p>
                     </div>
                   </div>
                 </CardContent>

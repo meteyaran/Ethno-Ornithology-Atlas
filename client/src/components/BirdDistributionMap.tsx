@@ -1,10 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, MapPin, Calendar, Eye } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Loader2, MapPin, Calendar, Eye, Layers, Clock, Leaf, Globe2 } from 'lucide-react';
 
 interface Observation {
   speciesCode: string;
@@ -20,6 +22,7 @@ interface Observation {
   obsReviewed: boolean;
   locationPrivate: boolean;
   subId: string;
+  exoticCategory?: string;
 }
 
 interface BirdDistributionMapProps {
@@ -27,15 +30,58 @@ interface BirdDistributionMapProps {
   scientificName: string;
   birdName: string;
   onObservationsLoaded?: (count: number) => void;
+  onTimeRangeChange?: (range: string) => void;
 }
 
-const createBirdIcon = () => {
+type MapLayerType = 'street' | 'terrain' | 'satellite' | 'hybrid';
+type TimeRange = '7' | '14' | '30';
+
+const mapLayers: Record<MapLayerType, { url: string; attribution: string; name: string }> = {
+  street: {
+    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    name: 'Sokak'
+  },
+  terrain: {
+    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://opentopomap.org">OpenTopoMap</a>',
+    name: 'Arazi'
+  },
+  satellite: {
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution: '&copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+    name: 'Uydu'
+  },
+  hybrid: {
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution: '&copy; Esri',
+    name: 'Hibrit'
+  }
+};
+
+const timeRanges: Record<TimeRange, string> = {
+  '7': 'Son 7 gün',
+  '14': 'Son 14 gün',
+  '30': 'Son 30 gün'
+};
+
+const getObservationColor = (count: number): string => {
+  if (count >= 100) return '#7c3aed';
+  if (count >= 50) return '#a855f7';
+  if (count >= 20) return '#c084fc';
+  if (count >= 10) return '#3b82f6';
+  if (count >= 5) return '#06b6d4';
+  return '#22c55e';
+};
+
+const createBirdIcon = (isExotic: boolean = false) => {
+  const color = isExotic ? '#dc2626' : 'hsl(142, 76%, 36%)';
   return L.divIcon({
     className: 'bird-marker',
     html: `<div style="
       width: 12px;
       height: 12px;
-      background: hsl(var(--primary));
+      background: ${color};
       border: 2px solid white;
       border-radius: 50%;
       box-shadow: 0 2px 4px rgba(0,0,0,0.3);
@@ -46,14 +92,15 @@ const createBirdIcon = () => {
   });
 };
 
-const createClusterIcon = (count: number) => {
+const createClusterIcon = (count: number, hasExotic: boolean = false) => {
   const size = count > 100 ? 40 : count > 50 ? 35 : count > 10 ? 30 : 25;
+  const color = hasExotic ? '#dc2626' : getObservationColor(count);
   return L.divIcon({
     className: 'cluster-marker',
     html: `<div style="
       width: ${size}px;
       height: ${size}px;
-      background: hsl(var(--primary));
+      background: ${color};
       border: 3px solid white;
       border-radius: 50%;
       box-shadow: 0 2px 6px rgba(0,0,0,0.4);
@@ -84,72 +131,157 @@ function MapController({ observations }: { observations: Observation[] }) {
   return null;
 }
 
-function clusterObservations(observations: Observation[], zoomLevel: number): { center: Observation; count: number; items: Observation[] }[] {
+function clusterObservations(observations: Observation[], zoomLevel: number): { center: Observation; count: number; items: Observation[]; hasExotic: boolean }[] {
   if (zoomLevel >= 8) {
-    return observations.map(obs => ({ center: obs, count: 1, items: [obs] }));
+    return observations.map(obs => ({ 
+      center: obs, 
+      count: 1, 
+      items: [obs],
+      hasExotic: obs.exoticCategory === 'X' || obs.exoticCategory === 'P'
+    }));
   }
   
   const gridSize = zoomLevel < 4 ? 10 : zoomLevel < 6 ? 5 : 2;
-  const clusters = new Map<string, { center: Observation; count: number; items: Observation[] }>();
+  const clusters = new Map<string, { center: Observation; count: number; items: Observation[]; hasExotic: boolean }>();
   
   observations.forEach(obs => {
     const gridX = Math.floor(obs.lng / gridSize);
     const gridY = Math.floor(obs.lat / gridSize);
     const key = `${gridX}-${gridY}`;
+    const isExotic = obs.exoticCategory === 'X' || obs.exoticCategory === 'P';
     
     if (clusters.has(key)) {
       const cluster = clusters.get(key)!;
       cluster.count++;
       cluster.items.push(obs);
+      if (isExotic) cluster.hasExotic = true;
     } else {
-      clusters.set(key, { center: obs, count: 1, items: [obs] });
+      clusters.set(key, { center: obs, count: 1, items: [obs], hasExotic: isExotic });
     }
   });
   
   return Array.from(clusters.values());
 }
 
+function Legend() {
+  const legendItems = [
+    { color: '#22c55e', label: '1-4 gözlem' },
+    { color: '#06b6d4', label: '5-9 gözlem' },
+    { color: '#3b82f6', label: '10-19 gözlem' },
+    { color: '#c084fc', label: '20-49 gözlem' },
+    { color: '#a855f7', label: '50-99 gözlem' },
+    { color: '#7c3aed', label: '100+ gözlem' },
+  ];
+
+  return (
+    <div className="absolute bottom-4 left-4 z-[1000] bg-background/95 backdrop-blur-sm rounded-lg p-3 shadow-lg border">
+      <h4 className="text-xs font-semibold mb-2 flex items-center gap-1">
+        <Eye className="w-3 h-3" />
+        Gözlem Yoğunluğu
+      </h4>
+      <div className="space-y-1">
+        {legendItems.map((item, i) => (
+          <div key={i} className="flex items-center gap-2 text-xs">
+            <div 
+              className="w-3 h-3 rounded-full border border-white shadow-sm" 
+              style={{ backgroundColor: item.color }}
+            />
+            <span className="text-muted-foreground">{item.label}</span>
+          </div>
+        ))}
+      </div>
+      <div className="mt-2 pt-2 border-t space-y-1">
+        <div className="flex items-center gap-2 text-xs">
+          <div className="w-3 h-3 rounded-full border border-white shadow-sm bg-green-600" />
+          <span className="text-muted-foreground">Yerli tür</span>
+        </div>
+        <div className="flex items-center gap-2 text-xs">
+          <div className="w-3 h-3 rounded-full border border-white shadow-sm bg-red-600" />
+          <span className="text-muted-foreground">Egzotik/Tanıtılmış</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MapLayerControl({ 
+  currentLayer, 
+  onLayerChange 
+}: { 
+  currentLayer: MapLayerType; 
+  onLayerChange: (layer: MapLayerType) => void;
+}) {
+  return (
+    <div className="absolute top-4 right-4 z-[1000] bg-background/95 backdrop-blur-sm rounded-lg p-2 shadow-lg border">
+      <div className="flex items-center gap-1 mb-2">
+        <Layers className="w-3 h-3 text-muted-foreground" />
+        <span className="text-xs font-medium">Harita Tipi</span>
+      </div>
+      <div className="grid grid-cols-2 gap-1">
+        {(Object.entries(mapLayers) as [MapLayerType, typeof mapLayers[MapLayerType]][]).map(([key, layer]) => (
+          <Button
+            key={key}
+            variant={currentLayer === key ? "default" : "outline"}
+            size="sm"
+            className="text-xs h-7 px-2"
+            onClick={() => onLayerChange(key)}
+            data-testid={`button-layer-${key}`}
+          >
+            {layer.name}
+          </Button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function BirdDistributionMap({ 
   speciesCode, 
   scientificName, 
   birdName,
-  onObservationsLoaded 
+  onObservationsLoaded,
+  onTimeRangeChange
 }: BirdDistributionMapProps) {
   const [observations, setObservations] = useState<Observation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [zoomLevel, setZoomLevel] = useState(3);
+  const [mapLayer, setMapLayer] = useState<MapLayerType>('street');
+  const [timeRange, setTimeRange] = useState<TimeRange>('30');
   const mapRef = useRef<L.Map | null>(null);
   
-  useEffect(() => {
-    const fetchObservations = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        const response = await fetch(`/api/ebird/global/${speciesCode}?back=30`);
-        
-        if (!response.ok) {
-          throw new Error('Gözlem verileri alınamadı');
-        }
-        
-        const data = await response.json();
-        setObservations(data.observations || []);
-        onObservationsLoaded?.(data.count || 0);
-      } catch (err) {
-        console.error('Error fetching observations:', err);
-        setError(err instanceof Error ? err.message : 'Bilinmeyen hata');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchObservations = useCallback(async () => {
+    setLoading(true);
+    setError(null);
     
+    try {
+      const response = await fetch(`/api/ebird/global/${speciesCode}?back=${timeRange}`);
+      
+      if (!response.ok) {
+        throw new Error('Gözlem verileri alınamadı');
+      }
+      
+      const data = await response.json();
+      setObservations(data.observations || []);
+      onObservationsLoaded?.(data.count || 0);
+    } catch (err) {
+      console.error('Error fetching observations:', err);
+      setError(err instanceof Error ? err.message : 'Bilinmeyen hata');
+    } finally {
+      setLoading(false);
+    }
+  }, [speciesCode, timeRange, onObservationsLoaded]);
+  
+  useEffect(() => {
     if (speciesCode) {
       fetchObservations();
     }
-  }, [speciesCode, onObservationsLoaded]);
+  }, [speciesCode, fetchObservations]);
   
   const clusters = clusterObservations(observations, zoomLevel);
+  
+  const exoticCount = observations.filter(o => o.exoticCategory === 'X' || o.exoticCategory === 'P').length;
+  const nativeCount = observations.length - exoticCount;
   
   if (loading) {
     return (
@@ -182,6 +314,8 @@ export function BirdDistributionMap({
     );
   }
   
+  const currentLayerConfig = mapLayers[mapLayer];
+  
   return (
     <Card className="w-full">
       <CardHeader className="pb-3">
@@ -190,14 +324,40 @@ export function BirdDistributionMap({
             <CardTitle className="text-xl">{birdName} Dağılım Haritası</CardTitle>
             <CardDescription className="italic">{scientificName}</CardDescription>
           </div>
-          <Badge variant="secondary" className="gap-1">
-            <Eye className="w-3 h-3" />
-            {observations.length} gözlem
-          </Badge>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Select value={timeRange} onValueChange={(v) => { setTimeRange(v as TimeRange); onTimeRangeChange?.(timeRanges[v as TimeRange]); }}>
+              <SelectTrigger className="w-[140px] h-8" data-testid="select-time-range">
+                <Clock className="w-3 h-3 mr-1" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {(Object.entries(timeRanges) as [TimeRange, string][]).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>{label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Badge variant="secondary" className="gap-1">
+              <Eye className="w-3 h-3" />
+              {observations.length} gözlem
+            </Badge>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-4 mt-2 text-sm">
+          <div className="flex items-center gap-1">
+            <Leaf className="w-4 h-4 text-green-600" />
+            <span className="text-muted-foreground">Yerli: <strong>{nativeCount}</strong></span>
+          </div>
+          {exoticCount > 0 && (
+            <div className="flex items-center gap-1">
+              <Globe2 className="w-4 h-4 text-red-600" />
+              <span className="text-muted-foreground">Egzotik: <strong>{exoticCount}</strong></span>
+            </div>
+          )}
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="h-[500px] w-full rounded-b-lg overflow-hidden">
+        <div className="h-[500px] w-full rounded-b-lg overflow-hidden relative">
           <MapContainer
             center={[20, 0]}
             zoom={2}
@@ -213,68 +373,89 @@ export function BirdDistributionMap({
             }}
           >
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-              url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+              key={mapLayer}
+              attribution={currentLayerConfig.attribution}
+              url={currentLayerConfig.url}
             />
+            
+            {mapLayer === 'hybrid' && (
+              <TileLayer
+                url="https://stamen-tiles.a.ssl.fastly.net/toner-labels/{z}/{x}/{y}.png"
+                attribution=""
+              />
+            )}
             
             <MapController observations={observations} />
             
-            {clusters.map((cluster, index) => (
-              <Marker
-                key={`${cluster.center.locId}-${index}`}
-                position={[cluster.center.lat, cluster.center.lng]}
-                icon={cluster.count > 1 ? createClusterIcon(cluster.count) : createBirdIcon()}
-              >
-                <Popup>
-                  <div className="min-w-[200px]">
-                    <h3 className="font-semibold text-foreground">{cluster.center.comName}</h3>
-                    <p className="text-sm italic text-muted-foreground mb-2">{cluster.center.sciName}</p>
-                    
-                    {cluster.count > 1 ? (
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium">{cluster.count} gözlem noktası</p>
-                        <div className="max-h-[150px] overflow-y-auto space-y-1">
-                          {cluster.items.slice(0, 5).map((obs, i) => (
-                            <div key={i} className="text-xs border-l-2 border-primary pl-2">
-                              <p className="font-medium">{obs.locName}</p>
-                              <p className="text-muted-foreground">{obs.obsDt}</p>
-                            </div>
-                          ))}
-                          {cluster.items.length > 5 && (
-                            <p className="text-xs text-muted-foreground">
-                              +{cluster.items.length - 5} daha...
+            {clusters.map((cluster, index) => {
+              const isExotic = cluster.center.exoticCategory === 'X' || cluster.center.exoticCategory === 'P';
+              return (
+                <Marker
+                  key={`${cluster.center.locId}-${index}`}
+                  position={[cluster.center.lat, cluster.center.lng]}
+                  icon={cluster.count > 1 ? createClusterIcon(cluster.count, cluster.hasExotic) : createBirdIcon(isExotic)}
+                >
+                  <Popup>
+                    <div className="min-w-[200px]">
+                      <h3 className="font-semibold text-foreground">{cluster.center.comName}</h3>
+                      <p className="text-sm italic text-muted-foreground mb-2">{cluster.center.sciName}</p>
+                      
+                      {cluster.center.exoticCategory && (
+                        <Badge variant={cluster.center.exoticCategory === 'X' || cluster.center.exoticCategory === 'P' ? "destructive" : "secondary"} className="mb-2 text-xs">
+                          {cluster.center.exoticCategory === 'X' ? 'Egzotik' : 
+                           cluster.center.exoticCategory === 'P' ? 'Tanıtılmış' : 'Yerli'}
+                        </Badge>
+                      )}
+                      
+                      {cluster.count > 1 ? (
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium">{cluster.count} gözlem noktası</p>
+                          <div className="max-h-[150px] overflow-y-auto space-y-1">
+                            {cluster.items.slice(0, 5).map((obs, i) => (
+                              <div key={i} className="text-xs border-l-2 border-primary pl-2">
+                                <p className="font-medium">{obs.locName}</p>
+                                <p className="text-muted-foreground">{obs.obsDt}</p>
+                              </div>
+                            ))}
+                            {cluster.items.length > 5 && (
+                              <p className="text-xs text-muted-foreground">
+                                +{cluster.items.length - 5} daha...
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-1 text-sm mb-1">
+                            <MapPin className="w-3 h-3" />
+                            <span>{cluster.center.locName}</span>
+                          </div>
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <Calendar className="w-3 h-3" />
+                            <span>{cluster.center.obsDt}</span>
+                          </div>
+                          {cluster.center.howMany && (
+                            <p className="text-sm mt-1">
+                              Sayı: <strong>{cluster.center.howMany}</strong>
                             </p>
                           )}
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="flex items-center gap-1 text-sm mb-1">
-                          <MapPin className="w-3 h-3" />
-                          <span>{cluster.center.locName}</span>
-                        </div>
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                          <Calendar className="w-3 h-3" />
-                          <span>{cluster.center.obsDt}</span>
-                        </div>
-                        {cluster.center.howMany && (
-                          <p className="text-sm mt-1">
-                            Sayı: <strong>{cluster.center.howMany}</strong>
-                          </p>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
+                        </>
+                      )}
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            })}
           </MapContainer>
+          
+          <MapLayerControl currentLayer={mapLayer} onLayerChange={setMapLayer} />
+          <Legend />
         </div>
         
         {observations.length === 0 && !loading && (
           <div className="p-4 text-center text-muted-foreground">
-            <p>Son 30 günde bu tür için gözlem kaydı bulunamadı.</p>
-            <p className="text-sm mt-1">Farklı bir dönem veya bölge deneyin.</p>
+            <p>{timeRanges[timeRange]} içinde bu tür için gözlem kaydı bulunamadı.</p>
+            <p className="text-sm mt-1">Farklı bir dönem seçmeyi deneyin.</p>
           </div>
         )}
       </CardContent>
