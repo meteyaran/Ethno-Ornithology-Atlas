@@ -13,21 +13,34 @@ export function Hero() {
         />
       </div>
       
-      <div className="absolute inset-0 bg-gradient-to-b from-[#7a9d0f]/20 via-transparent to-background/40" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50" />
       
-      <div className="relative h-full flex flex-col items-center justify-center px-6 text-center">
-        <div className="max-w-4xl bg-black/40 backdrop-blur-sm rounded-2xl px-8 py-10">
+      <div className="relative h-full flex flex-col items-center justify-end px-6 pb-12 text-center">
+        <div className="max-w-4xl">
+          <div className="mb-4 flex justify-center">
+            <div className="w-24 h-[2px] bg-gradient-to-r from-transparent via-white/60 to-transparent" />
+          </div>
           <h1 
-            className="font-serif text-5xl md:text-7xl font-bold text-white mb-6 tracking-wide leading-tight drop-shadow-2xl"
+            className="font-serif text-5xl md:text-7xl font-bold text-white mb-4 tracking-wider leading-tight italic"
+            style={{ textShadow: '2px 2px 8px rgba(0,0,0,0.7), 0 0 40px rgba(0,0,0,0.5)' }}
             data-testid="text-hero-title"
           >
             A'dan Z'ye Dünya Kuşları
           </h1>
-          <p className="text-white text-base md:text-xl max-w-3xl mx-auto font-light leading-relaxed">
+          <div className="mb-6 flex justify-center">
+            <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+          </div>
+          <p 
+            className="text-white/90 text-base md:text-lg max-w-2xl mx-auto font-light leading-relaxed tracking-wide italic"
+            style={{ textShadow: '1px 1px 6px rgba(0,0,0,0.8)' }}
+          >
             Kuşların izlenimlerini ve dilin izlerini aynı sayfada buluşturur. 
             Her kuş resmi bir kelimeye benzer; anlamı sabit değildir. 
             Renkler ışıkla değişir, kelimelerse bir bakışla.
           </p>
+          <div className="mt-6 flex justify-center">
+            <div className="w-32 h-[2px] bg-gradient-to-r from-transparent via-white/50 to-transparent" />
+          </div>
         </div>
       </div>
     </section>
