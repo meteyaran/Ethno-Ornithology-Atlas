@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, MapPin, Calendar, Eye, Layers, Clock, Leaf, Globe2 } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Loader2, MapPin, Calendar, Eye, Layers, Clock, Leaf, Globe2, History, CalendarDays } from 'lucide-react';
 
 interface Observation {
   speciesCode: string;
@@ -35,6 +36,29 @@ interface BirdDistributionMapProps {
 
 type MapLayerType = 'street' | 'terrain' | 'satellite' | 'hybrid';
 type TimeRange = '7' | '14' | '30';
+type TimeMode = 'recent' | 'historical';
+
+const currentYear = new Date().getFullYear();
+
+const months = [
+  { value: '1', label: 'Ocak' },
+  { value: '2', label: 'Şubat' },
+  { value: '3', label: 'Mart' },
+  { value: '4', label: 'Nisan' },
+  { value: '5', label: 'Mayıs' },
+  { value: '6', label: 'Haziran' },
+  { value: '7', label: 'Temmuz' },
+  { value: '8', label: 'Ağustos' },
+  { value: '9', label: 'Eylül' },
+  { value: '10', label: 'Ekim' },
+  { value: '11', label: 'Kasım' },
+  { value: '12', label: 'Aralık' },
+];
+
+const yearOptions = Array.from({ length: currentYear - 1899 }, (_, i) => ({
+  value: String(1900 + i),
+  label: String(1900 + i)
+})).reverse();
 
 const mapLayers: Record<MapLayerType, { url: string; attribution: string; name: string }> = {
   street: {
@@ -247,15 +271,45 @@ export function BirdDistributionMap({
   const [error, setError] = useState<string | null>(null);
   const [zoomLevel, setZoomLevel] = useState(3);
   const [mapLayer, setMapLayer] = useState<MapLayerType>('street');
+  const [timeMode, setTimeMode] = useState<TimeMode>('recent');
   const [timeRange, setTimeRange] = useState<TimeRange>('30');
+  const [startYear, setStartYear] = useState(String(currentYear - 5));
+  const [endYear, setEndYear] = useState(String(currentYear));
+  const [startMonth, setStartMonth] = useState('1');
+  const [endMonth, setEndMonth] = useState('12');
   const mapRef = useRef<L.Map | null>(null);
+  
+  const getTimeRangeLabel = useCallback(() => {
+    if (timeMode === 'recent') {
+      return timeRanges[timeRange];
+    } else {
+      const sMonth = months.find(m => m.value === startMonth)?.label || startMonth;
+      const eMonth = months.find(m => m.value === endMonth)?.label || endMonth;
+      if (startYear === endYear) {
+        return `${startYear} (${sMonth}-${eMonth})`;
+      }
+      return `${startYear}-${endYear} (${sMonth}-${eMonth})`;
+    }
+  }, [timeMode, timeRange, startYear, endYear, startMonth, endMonth]);
   
   const fetchObservations = useCallback(async () => {
     setLoading(true);
     setError(null);
     
     try {
-      const response = await fetch(`/api/ebird/global/${speciesCode}?back=${timeRange}`);
+      let response;
+      
+      if (timeMode === 'recent') {
+        response = await fetch(`/api/ebird/global/${speciesCode}?back=${timeRange}`);
+      } else {
+        const params = new URLSearchParams({
+          startYear,
+          endYear,
+          startMonth,
+          endMonth
+        });
+        response = await fetch(`/api/ebird/historical/${speciesCode}?${params}`);
+      }
       
       if (!response.ok) {
         throw new Error('Gözlem verileri alınamadı');
@@ -264,13 +318,14 @@ export function BirdDistributionMap({
       const data = await response.json();
       setObservations(data.observations || []);
       onObservationsLoaded?.(data.count || 0);
+      onTimeRangeChange?.(getTimeRangeLabel());
     } catch (err) {
       console.error('Error fetching observations:', err);
       setError(err instanceof Error ? err.message : 'Bilinmeyen hata');
     } finally {
       setLoading(false);
     }
-  }, [speciesCode, timeRange, onObservationsLoaded]);
+  }, [speciesCode, timeMode, timeRange, startYear, endYear, startMonth, endMonth, onObservationsLoaded, onTimeRangeChange, getTimeRangeLabel]);
   
   useEffect(() => {
     if (speciesCode) {
@@ -324,26 +379,120 @@ export function BirdDistributionMap({
             <CardTitle className="text-xl">{birdName} Dağılım Haritası</CardTitle>
             <CardDescription className="italic">{scientificName}</CardDescription>
           </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <Select value={timeRange} onValueChange={(v) => { setTimeRange(v as TimeRange); onTimeRangeChange?.(timeRanges[v as TimeRange]); }}>
-              <SelectTrigger className="w-[140px] h-8" data-testid="select-time-range">
-                <Clock className="w-3 h-3 mr-1" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {(Object.entries(timeRanges) as [TimeRange, string][]).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>{label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Badge variant="secondary" className="gap-1">
-              <Eye className="w-3 h-3" />
-              {observations.length} gözlem
-            </Badge>
-          </div>
+          <Badge variant="secondary" className="gap-1">
+            <Eye className="w-3 h-3" />
+            {observations.length} gözlem
+          </Badge>
         </div>
         
-        <div className="flex items-center gap-4 mt-2 text-sm">
+        <div className="mt-3 space-y-3">
+          <Tabs value={timeMode} onValueChange={(v) => setTimeMode(v as TimeMode)} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="recent" className="gap-1" data-testid="tab-recent">
+                <Clock className="w-3 h-3" />
+                Son Günler
+              </TabsTrigger>
+              <TabsTrigger value="historical" className="gap-1" data-testid="tab-historical">
+                <History className="w-3 h-3" />
+                Tarihsel
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+          
+          {timeMode === 'recent' ? (
+            <div className="flex items-center gap-2">
+              <Select value={timeRange} onValueChange={(v) => setTimeRange(v as TimeRange)}>
+                <SelectTrigger className="w-full h-8" data-testid="select-time-range">
+                  <Clock className="w-3 h-3 mr-1" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {(Object.entries(timeRanges) as [TimeRange, string][]).map(([value, label]) => (
+                    <SelectItem key={value} value={value}>{label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="flex-1">
+                  <label className="text-xs text-muted-foreground mb-1 block">Başlangıç Yılı</label>
+                  <Select value={startYear} onValueChange={setStartYear}>
+                    <SelectTrigger className="h-8" data-testid="select-start-year">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-[200px]">
+                      {yearOptions.map(year => (
+                        <SelectItem key={year.value} value={year.value}>{year.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex-1">
+                  <label className="text-xs text-muted-foreground mb-1 block">Bitiş Yılı</label>
+                  <Select value={endYear} onValueChange={setEndYear}>
+                    <SelectTrigger className="h-8" data-testid="select-end-year">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-[200px]">
+                      {yearOptions.map(year => (
+                        <SelectItem key={year.value} value={year.value}>{year.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <div className="flex-1">
+                  <label className="text-xs text-muted-foreground mb-1 block flex items-center gap-1">
+                    <CalendarDays className="w-3 h-3" />
+                    Başlangıç Ayı
+                  </label>
+                  <Select value={startMonth} onValueChange={setStartMonth}>
+                    <SelectTrigger className="h-8" data-testid="select-start-month">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {months.map(month => (
+                        <SelectItem key={month.value} value={month.value}>{month.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex-1">
+                  <label className="text-xs text-muted-foreground mb-1 block flex items-center gap-1">
+                    <CalendarDays className="w-3 h-3" />
+                    Bitiş Ayı
+                  </label>
+                  <Select value={endMonth} onValueChange={setEndMonth}>
+                    <SelectTrigger className="h-8" data-testid="select-end-month">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {months.map(month => (
+                        <SelectItem key={month.value} value={month.value}>{month.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <Button 
+                onClick={fetchObservations} 
+                className="w-full h-8"
+                disabled={loading}
+                data-testid="button-apply-filters"
+              >
+                {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <History className="w-4 h-4 mr-2" />}
+                Tarihsel Verileri Getir
+              </Button>
+            </div>
+          )}
+        </div>
+        
+        <div className="flex items-center gap-4 mt-3 text-sm">
           <div className="flex items-center gap-1">
             <Leaf className="w-4 h-4 text-green-600" />
             <span className="text-muted-foreground">Yerli: <strong>{nativeCount}</strong></span>
@@ -454,7 +603,12 @@ export function BirdDistributionMap({
         
         {observations.length === 0 && !loading && (
           <div className="p-4 text-center text-muted-foreground">
-            <p>{timeRanges[timeRange]} içinde bu tür için gözlem kaydı bulunamadı.</p>
+            <p>
+              {timeMode === 'recent' 
+                ? `${timeRanges[timeRange]} içinde bu tür için gözlem kaydı bulunamadı.`
+                : `${startYear}-${endYear} yılları arasında bu tür için gözlem kaydı bulunamadı.`
+              }
+            </p>
             <p className="text-sm mt-1">Farklı bir dönem seçmeyi deneyin.</p>
           </div>
         )}
