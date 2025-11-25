@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'wouter';
 import { birds } from '@/data/birds';
 import { BirdDistributionMap } from '@/components/BirdDistributionMap';
@@ -7,101 +7,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Search, MapPin, Bird, Globe } from 'lucide-react';
-
-const speciesCodeMap: Record<string, string> = {
-  'Gypaetus barbatus': 'lamvul1',
-  'Motacilla alba': 'whiwag',
-  'Ardea cinerea': 'graher1',
-  'Erithacus rubecula': 'eurrob1',
-  'Cyanistes caeruleus': 'blutit1',
-  'Alcedo atthis': 'comkin1',
-  'Carduelis carduelis': 'eurgol',
-  'Hirundo rustica': 'barswa',
-  'Garrulus glandarius': 'eurjay1',
-  'Upupa epops': 'hoopoe',
-  'Ciconia ciconia': 'whisto1',
-  'Dendrocopos major': 'grswoo',
-  'Luscinia megarhynchos': 'eurnig1',
-  'Bubo bubo': 'eaowl1',
-  'Grus grus': 'comcra',
-  'Phoenicopterus roseus': 'grefla1',
-  'Corvus corax': 'comrav',
-  'Parus major': 'gretit1',
-  'Pica pica': 'eurmag1',
-  'Vanellus vanellus': 'norlap',
-  'Coturnix coturnix': 'comqua',
-  'Egretta garzetta': 'litegr',
-  'Fringilla coelebs': 'chafin',
-  'Emberiza citrinella': 'yellow3',
-  'Pandion haliaetus': 'osprey',
-  'Falco peregrinus': 'perfal',
-  'Streptopelia turtur': 'eutdov',
-  'Sitta europaea': 'euanut1',
-  'Regulus regulus': 'goldcr1',
-  'Cuculus canorus': 'comcuc',
-  'Somateria mollissima': 'comeid',
-  'Himantopus himantopus': 'bknsti',
-  'Chroicocephalus genei': 'slbgul1',
-  'Larus michahellis': 'yelgul1',
-  'Charadrius hiaticula': 'corplo',
-  'Haematopus ostralegus': 'euroys1',
-  'Ichthyaetus melanocephalus': 'medgul',
-  'Sterna hirundo': 'comter',
-  'Thalasseus sandvicensis': 'santer1',
-  'Tachybaptus ruficollis': 'litgre1',
-  'Podiceps cristatus': 'grcgre1',
-  'Podiceps nigricollis': 'bkngre',
-  'Phalacrocorax carbo': 'grecor',
-  'Gulosus aristotelis': 'eushag1',
-  'Ixobrychus minutus': 'litbit1',
-  'Ardeola ralloides': 'squhre1',
-  'Ardea alba': 'greegr',
-  'Ciconia nigra': 'blasto1',
-  'Platalea leucorodia': 'eurspo1',
-  'Cygnus olor': 'mutswa',
-  'Cygnus cygnus': 'whoswa',
-  'Tadorna ferruginea': 'rusduc1',
-  'Tadorna tadorna': 'comshe',
-  'Mareca penelope': 'euwig',
-  'Mareca strepera': 'gadwal',
-  'Anas crecca': 'gretea1',
-  'Anas platyrhynchos': 'mallar3',
-  'Anas acuta': 'norpin',
-  'Spatula querquedula': 'gargan',
-  'Spatula clypeata': 'norsho',
-  'Netta rufina': 'recpoc',
-  'Aythya ferina': 'compoc',
-  'Aythya nyroca': 'ferduc',
-  'Aythya fuligula': 'tufduc',
-  'Bucephala clangula': 'comgol',
-  'Mergellus albellus': 'smew',
-  'Mergus merganser': 'gommer',
-  'Oxyura leucocephala': 'whhduc1',
-  'Pernis apivorus': 'euhbuz1',
-  'Athene noctua': 'litowl1',
-  'Tyto alba': 'brnowl',
-  'Asio otus': 'loeowl',
-  'Strix aluco': 'tawowl1',
-  'Otus scops': 'eusowl1',
-  'Asio flammeus': 'sheowl',
-  'Accipiter nisus': 'eurspa1',
-  'Accipiter gentilis': 'norgow1',
-  'Buteo buteo': 'combuz1',
-  'Milvus migrans': 'blkkit1',
-  'Milvus milvus': 'redkit1',
-  'Aquila chrysaetos': 'goleag',
-  'Falco tinnunculus': 'eurkes',
-  'Falco subbuteo': 'eurhob1',
-  'Hieraaetus pennatus': 'booeag1',
-  'Anser anser': 'gragoo',
-  'Aythya marila': 'gresca',
-};
+import { ArrowLeft, Search, MapPin, Bird, Globe, MousePointerClick, Loader2 } from 'lucide-react';
 
 export default function Distribution() {
   const [selectedBird, setSelectedBird] = useState<typeof birds[0] | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [observationCount, setObservationCount] = useState(0);
+  const [speciesCode, setSpeciesCode] = useState<string | null>(null);
+  const [loadingSpeciesCode, setLoadingSpeciesCode] = useState(false);
+  const [speciesCodeError, setSpeciesCodeError] = useState<string | null>(null);
   
   const filteredBirds = useMemo(() => {
     if (!searchTerm) return birds;
@@ -123,9 +37,42 @@ export default function Distribution() {
     return groups;
   }, [filteredBirds]);
   
-  const getSpeciesCode = (scientificName: string): string => {
-    return speciesCodeMap[scientificName] || scientificName.toLowerCase().replace(' ', '').slice(0, 6);
-  };
+  useEffect(() => {
+    const fetchSpeciesCode = async () => {
+      if (!selectedBird) {
+        setSpeciesCode(null);
+        return;
+      }
+      
+      setLoadingSpeciesCode(true);
+      setSpeciesCodeError(null);
+      
+      try {
+        const response = await fetch(`/api/ebird/taxonomy?scientificName=${encodeURIComponent(selectedBird.scientificName)}`);
+        
+        if (!response.ok) {
+          throw new Error('Tür kodu alınamadı');
+        }
+        
+        const data = await response.json();
+        
+        if (data.species && data.species.speciesCode) {
+          setSpeciesCode(data.species.speciesCode);
+        } else {
+          setSpeciesCodeError('Bu tür eBird veritabanında bulunamadı');
+          setSpeciesCode(null);
+        }
+      } catch (err) {
+        console.error('Error fetching species code:', err);
+        setSpeciesCodeError('Tür kodu alınırken hata oluştu');
+        setSpeciesCode(null);
+      } finally {
+        setLoadingSpeciesCode(false);
+      }
+    };
+    
+    fetchSpeciesCode();
+  }, [selectedBird]);
   
   return (
     <div className="min-h-screen bg-background">
@@ -215,25 +162,61 @@ export default function Distribution() {
           </div>
           
           <div className="lg:col-span-2">
-            {selectedBird ? (
+            {selectedBird && speciesCode ? (
               <BirdDistributionMap
-                speciesCode={getSpeciesCode(selectedBird.scientificName)}
+                speciesCode={speciesCode}
                 scientificName={selectedBird.scientificName}
                 birdName={selectedBird.name}
                 onObservationsLoaded={setObservationCount}
               />
+            ) : selectedBird && loadingSpeciesCode ? (
+              <Card className="h-[580px]">
+                <CardContent className="h-full flex items-center justify-center">
+                  <div className="flex flex-col items-center gap-4">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                    <p className="text-muted-foreground">
+                      {selectedBird.name} için eBird kodu aranıyor...
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : selectedBird && speciesCodeError ? (
+              <Card className="h-[580px]">
+                <CardContent className="h-full flex items-center justify-center">
+                  <div className="text-center space-y-4">
+                    <div className="w-20 h-20 mx-auto rounded-full bg-destructive/10 flex items-center justify-center">
+                      <Bird className="w-10 h-10 text-destructive" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-medium">Tür Bulunamadı</h3>
+                      <p className="text-muted-foreground mt-1">
+                        {selectedBird.name} ({selectedBird.scientificName})<br/>
+                        eBird veritabanında bulunamadı.
+                      </p>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setSelectedBird(null)}
+                      className="gap-2"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                      Başka Kuş Seç
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             ) : (
               <Card className="h-[580px]">
                 <CardContent className="h-full flex items-center justify-center">
                   <div className="text-center space-y-4">
-                    <div className="w-20 h-20 mx-auto rounded-full bg-muted flex items-center justify-center">
-                      <MapPin className="w-10 h-10 text-muted-foreground" />
+                    <div className="w-20 h-20 mx-auto rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
+                      <MousePointerClick className="w-10 h-10 text-primary" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-medium">Kuş Türü Seçin</h3>
+                      <h3 className="text-lg font-medium">Listeden Bir Kuş Seçin</h3>
                       <p className="text-muted-foreground mt-1">
-                        Soldaki listeden bir kuş türü seçerek<br/>
-                        dünya genelindeki dağılımını görüntüleyin.
+                        Soldaki listeden herhangi bir kuşa<br/>
+                        <strong>tıklayarak</strong> dağılım haritasını görün.
                       </p>
                     </div>
                     <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
