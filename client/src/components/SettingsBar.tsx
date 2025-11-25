@@ -1,4 +1,4 @@
-import { Moon, Sun, Bird, Globe } from "lucide-react";
+import { Moon, Sun, Bird } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import {
@@ -6,11 +6,14 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { translations } from "@/lib/translations";
 
 export function SettingsBar() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [birdLang, setBirdLang] = useState(false);
   const [language, setLanguage] = useState<"tr" | "en">("tr");
+  
+  const t = (key: keyof typeof translations.tr) => translations[language][key];
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
@@ -68,7 +71,7 @@ export function SettingsBar() {
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>{birdLang ? "Kuş Dili: Açık" : "Kuş Dili: Kapalı"}</p>
+          <p>{birdLang ? t("birdLangOn") : t("birdLangOff")}</p>
         </TooltipContent>
       </Tooltip>
 
@@ -86,7 +89,7 @@ export function SettingsBar() {
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>{language === "tr" ? "Türkçe" : "English"}</p>
+          <p>{language === "tr" ? t("langTurkish") : t("langEnglish")}</p>
         </TooltipContent>
       </Tooltip>
 
@@ -108,7 +111,7 @@ export function SettingsBar() {
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>{theme === "light" ? "Gece Modu" : "Gündüz Modu"}</p>
+          <p>{theme === "light" ? t("nightMode") : t("dayMode")}</p>
         </TooltipContent>
       </Tooltip>
     </div>

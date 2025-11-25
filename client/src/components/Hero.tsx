@@ -1,6 +1,9 @@
 import heroImg from "@assets/generated_images/impressionist_bird_in_flight_hero.png";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export function Hero() {
+  const { t } = useTranslation();
+  
   return (
     <section className="relative h-[50vh] md:h-[60vh] w-full overflow-hidden bg-[#7a9d0f]">
       <div className="absolute inset-0 hero-pattern opacity-50"></div>
@@ -25,7 +28,7 @@ export function Hero() {
             style={{ textShadow: '2px 2px 8px rgba(0,0,0,0.7), 0 0 40px rgba(0,0,0,0.5)' }}
             data-testid="text-hero-title"
           >
-            A'dan Z'ye Dünya Kuşları
+            {t("heroTitle")}
           </h1>
           <div className="mb-6 flex justify-center">
             <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
@@ -34,9 +37,7 @@ export function Hero() {
             className="text-white/90 text-base md:text-lg max-w-2xl mx-auto font-light leading-relaxed tracking-wide italic"
             style={{ textShadow: '1px 1px 6px rgba(0,0,0,0.8)' }}
           >
-            Kuşların izlenimlerini ve dilin izlerini aynı sayfada buluşturur. 
-            Her kuş resmi bir kelimeye benzer; anlamı sabit değildir. 
-            Renkler ışıkla değişir, kelimelerse bir bakışla.
+            {t("heroDescription")}
           </p>
           <div className="mt-6 flex justify-center">
             <div className="w-32 h-[2px] bg-gradient-to-r from-transparent via-white/50 to-transparent" />

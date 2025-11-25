@@ -2,41 +2,55 @@ import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Mic, Brain, Globe, Languages, Volume2 } from "lucide-react";
 import { BirdSearch } from "./BirdSearch";
+import { useTranslation } from "@/hooks/useTranslation";
+import { TranslationKey } from "@/lib/translations";
 
-const features = [
+interface Feature {
+  href: string;
+  icon: typeof Brain;
+  secondIcon?: typeof Mic;
+  titleKey: TranslationKey;
+  descKey: TranslationKey;
+  testId: string;
+  tabParam?: string;
+}
+
+const features: Feature[] = [
   {
     href: "/identify",
     icon: Brain,
     secondIcon: Mic,
-    title: "ML Kuş Sesi Tanımlama",
-    description: "Yapay zeka ile kuş seslerini tanımlayın",
+    titleKey: "featureIdentify",
+    descKey: "featureIdentifyDesc",
     testId: "card-feature-identify"
   },
   {
     href: "/kus-dili",
     icon: Languages,
-    title: "Kuş Dili Çevirici",
-    description: "Eğlenceli gizli dil oyunu",
+    titleKey: "featureLanguage",
+    descKey: "featureLanguageDesc",
     testId: "card-feature-language"
   },
   {
     href: "/kus-dili",
     icon: Volume2,
-    title: "Islık Dili",
-    description: "UNESCO Kültürel Mirası - Kuşköy",
+    titleKey: "featureWhistle",
+    descKey: "featureWhistleDesc",
     testId: "card-feature-whistle",
     tabParam: "whistle"
   },
   {
     href: "/distribution",
     icon: Globe,
-    title: "Dünya Dağılım Haritası",
-    description: "Küresel kuş gözlem verileri",
+    titleKey: "featureDistribution",
+    descKey: "featureDistributionDesc",
     testId: "card-feature-distribution"
   }
 ];
 
 export function FeatureCards() {
+  const { t } = useTranslation();
+  
   return (
     <section className="bg-background py-6">
       <div className="container mx-auto px-6">
@@ -59,9 +73,9 @@ export function FeatureCards() {
                       <feature.icon className="w-6 h-6" />
                       {feature.secondIcon && <feature.secondIcon className="w-4 h-4" />}
                     </div>
-                    <h3 className="font-semibold text-sm leading-tight">{feature.title}</h3>
+                    <h3 className="font-semibold text-sm leading-tight">{t(feature.titleKey)}</h3>
                     <p className="text-xs text-muted-foreground line-clamp-2 hidden sm:block">
-                      {feature.description}
+                      {t(feature.descKey)}
                     </p>
                   </CardContent>
                 </Card>

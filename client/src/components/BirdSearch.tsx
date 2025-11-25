@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { birds } from "@/data/birds";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export function BirdSearch() {
   const [query, setQuery] = useState("");
@@ -10,6 +11,7 @@ export function BirdSearch() {
   const [, setLocation] = useLocation();
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
   const filteredBirds = query.length >= 1
     ? birds.filter(bird => 
@@ -47,7 +49,7 @@ export function BirdSearch() {
         <Input
           ref={inputRef}
           type="text"
-          placeholder="Kuş ara..."
+          placeholder={t("searchPlaceholder")}
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
@@ -102,7 +104,7 @@ export function BirdSearch() {
           className="absolute top-full left-0 right-0 mt-1 bg-card border rounded-lg shadow-lg z-50 p-4 text-center"
           data-testid="search-no-results"
         >
-          <p className="text-sm text-muted-foreground">"{query}" ile eşleşen kuş bulunamadı</p>
+          <p className="text-sm text-muted-foreground">"{query}" {t("searchNoResults")}</p>
         </div>
       )}
     </div>
