@@ -433,7 +433,7 @@ export const birds: Bird[] = [
   {
     id: "36",
     name: "Akdeniz Martısı",
-    scientificName: "Larus melanocephalus",
+    scientificName: "Ichthyaetus melanocephalus",
     region: ["Akdeniz", "Karadeniz"],
     size: "36-38 cm",
     colors: ["Beyaz", "Gri", "Siyah"],
