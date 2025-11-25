@@ -3,13 +3,22 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Xeno-canto API proxy endpoint for bird sounds
+  // Xeno-canto API v3 proxy endpoint for bird sounds
   app.get("/api/bird-sounds/:scientificName", async (req, res) => {
     try {
       const { scientificName } = req.params;
-      const apiUrl = `https://xeno-canto.org/api/2/recordings?query=${encodeURIComponent(scientificName)}`;
+      const apiKey = process.env.XENO_CANTO_API_KEY;
       
-      console.log("Fetching bird sounds from:", apiUrl);
+      if (!apiKey) {
+        console.error("XENO_CANTO_API_KEY not configured");
+        return res.status(500).json({ error: "API key not configured" });
+      }
+      
+      // API v3 uses sp: tag for species search
+      const query = `sp:"${scientificName}"`;
+      const apiUrl = `https://xeno-canto.org/api/3/recordings?query=${encodeURIComponent(query)}&key=${apiKey}&per_page=50`;
+      
+      console.log("Fetching bird sounds from Xeno-canto API v3 for:", scientificName);
       
       const response = await fetch(apiUrl, {
         headers: {
@@ -27,7 +36,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const data = await response.json();
-      console.log("Found", data.numRecordings, "recordings");
+      console.log("Found", data.numRecordings, "recordings for", scientificName);
       
       // Filter for quality A recordings first, then take top 3
       const recordings = data.recordings || [];
