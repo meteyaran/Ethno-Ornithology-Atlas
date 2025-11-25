@@ -196,3 +196,29 @@ Preferred communication style: Simple, everyday language.
 - Red markers for exotic/introduced species
 - Native species count displayed separately from exotic species
 - Location clustering based on zoom level
+
+### Bird Language Translator (Kuş Dili Çevirici)
+
+**Algorithm**
+- Turkish "Kuş Dili" (Bird Language) is a playful secret language game
+- Variant A (most common): After each vowel, append consonant + same vowel
+- Supports Turkish vowels: a, e, ı, i, o, ö, u, ü (and uppercase)
+- Case-preserving encoding/decoding
+
+**Consonant Variants**
+- 'g' variant (default): "merhaba" → "megerhagabaga"
+- 'b' variant: "merhaba" → "meberhabababa"
+- 'c' variant: "merhaba" → "mecerhacacaba"
+- 'f' variant: "merhaba" → "meferhafafaba"
+- 'lf' variant (Hırsız Dili/Thief Language): Multi-character variant
+
+**Frontend Features (BirdLanguage.tsx)**
+- Direction toggle: Turkish → Bird Language or Bird Language → Turkish
+- Multiple consonant variant selection via radio buttons
+- Real-time translation as user types
+- Copy to clipboard functionality
+- Example text quick-fill buttons
+- Settings persistence via localStorage
+- Informational section explaining Kuş Dili history
+
+**Route**: `/kus-dili`
