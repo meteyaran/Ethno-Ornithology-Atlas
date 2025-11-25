@@ -43,7 +43,7 @@ export function BirdSearch() {
   return (
     <div ref={containerRef} className="relative w-full max-w-xs">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
         <Input
           ref={inputRef}
           type="text"
@@ -54,16 +54,16 @@ export function BirdSearch() {
             setIsOpen(true);
           }}
           onFocus={() => setIsOpen(true)}
-          className="pl-9 pr-8 h-10"
+          className="pl-10 pr-9 h-14 text-base"
           data-testid="input-bird-search"
         />
         {query && (
           <button
             onClick={handleClear}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-muted"
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-full hover:bg-muted"
             data-testid="button-clear-search"
           >
-            <X className="w-4 h-4 text-muted-foreground" />
+            <X className="w-5 h-5 text-muted-foreground" />
           </button>
         )}
       </div>

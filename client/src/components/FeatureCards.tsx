@@ -39,9 +39,9 @@ const features = [
 export function FeatureCards() {
   return (
     <section className="bg-background py-6 px-4 md:px-6">
-      <div className="container mx-auto max-w-5xl">
-        <div className="flex flex-col md:flex-row items-stretch gap-4">
-          <div className="flex items-center justify-center md:justify-start">
+      <div className="container mx-auto max-w-6xl">
+        <div className="flex flex-col md:flex-row items-stretch gap-4 md:gap-6">
+          <div className="flex items-center justify-center md:justify-start shrink-0">
             <BirdSearch />
           </div>
           <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
