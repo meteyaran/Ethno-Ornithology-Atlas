@@ -1,7 +1,7 @@
 import heroImg from "@assets/generated_images/impressionist_bird_in_flight_hero.png";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Mic, Brain, Globe } from "lucide-react";
+import { Mic, Brain, Globe, Languages } from "lucide-react";
 
 export function Hero() {
   return (
@@ -53,6 +53,17 @@ export function Hero() {
               >
                 <Globe className="w-5 h-5" />
                 Dünya Dağılım Haritası
+              </Button>
+            </Link>
+            <Link href="/kus-dili">
+              <Button 
+                size="lg" 
+                className="gap-2 bg-white/20 backdrop-blur-sm border-white/30 text-white hover:bg-white/30"
+                variant="outline"
+                data-testid="button-bird-language"
+              >
+                <Languages className="w-5 h-5" />
+                Kuş Dili Çevirici
               </Button>
             </Link>
           </div>

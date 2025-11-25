@@ -7,6 +7,7 @@ import Home from "@/pages/Home";
 import BirdDetail from "@/pages/BirdDetail";
 import SoundIdentifier from "@/pages/SoundIdentifier";
 import Distribution from "@/pages/Distribution";
+import BirdLanguage from "@/pages/BirdLanguage";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -16,6 +17,7 @@ function Router() {
       <Route path="/bird/:id" component={BirdDetail} />
       <Route path="/identify" component={SoundIdentifier} />
       <Route path="/distribution" component={Distribution} />
+      <Route path="/kus-dili" component={BirdLanguage} />
       <Route component={NotFound} />
     </Switch>
   );
