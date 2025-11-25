@@ -78,6 +78,23 @@ import smewImg from "@assets/generated_images/smew_in_flight.png";
 import merganserImg from "@assets/generated_images/merganser_flying.png";
 import whiteHeadedDuckImg from "@assets/generated_images/white-headed_duck_flying.png";
 import honeyBuzzardImg from "@assets/generated_images/honey_buzzard_soaring.png";
+import littleOwlImg from "@assets/generated_images/little_owl_flying_illustration.png";
+import barnOwlImg from "@assets/generated_images/barn_owl_flying_illustration.png";
+import longEaredOwlImg from "@assets/generated_images/long-eared_owl_flying_illustration.png";
+import tawnyOwlImg from "@assets/generated_images/tawny_owl_flying_illustration.png";
+import scopsOwlImg from "@assets/generated_images/scops_owl_flying_illustration.png";
+import shortEaredOwlImg from "@assets/generated_images/short-eared_owl_flying_illustration.png";
+import sparrowhawkImg from "@assets/generated_images/sparrowhawk_flying_illustration.png";
+import goshawkImg from "@assets/generated_images/goshawk_flying_illustration.png";
+import commonBuzzardImg from "@assets/generated_images/common_buzzard_soaring_illustration.png";
+import blackKiteImg from "@assets/generated_images/black_kite_flying_illustration.png";
+import redKiteImg from "@assets/generated_images/red_kite_flying_illustration.png";
+import goldenEagleImg from "@assets/generated_images/golden_eagle_soaring_illustration.png";
+import kestrelImg from "@assets/generated_images/kestrel_hovering_illustration.png";
+import hobbyImg from "@assets/generated_images/hobby_falcon_flying_illustration.png";
+import bootedEagleImg from "@assets/generated_images/booted_eagle_flying_illustration.png";
+import greylagGooseImg from "@assets/generated_images/greylag_goose_flying_illustration.png";
+import greaterScaupImg from "@assets/generated_images/greater_scaup_flying_illustration.png";
 
 export const birds: Bird[] = [
   {
@@ -769,6 +786,176 @@ export const birds: Bird[] = [
     colors: ["Kahverengi", "Gri"],
     image: honeyBuzzardImg,
     letter: "A",
+  },
+  {
+    id: "70",
+    name: "Kukumav",
+    scientificName: "Athene noctua",
+    region: ["Avrupa", "Asya", "Kuzey Afrika"],
+    size: "21-23 cm",
+    colors: ["Kahverengi", "Beyaz benekli"],
+    image: littleOwlImg,
+    letter: "K",
+  },
+  {
+    id: "71",
+    name: "Peçeli Baykuş",
+    scientificName: "Tyto alba",
+    region: ["Dünya geneli"],
+    size: "33-39 cm",
+    colors: ["Beyaz", "Altın-kahverengi"],
+    image: barnOwlImg,
+    letter: "P",
+  },
+  {
+    id: "72",
+    name: "Kulaklı Orman Baykuşu",
+    scientificName: "Asio otus",
+    region: ["Avrupa", "Asya", "Kuzey Amerika"],
+    size: "31-37 cm",
+    colors: ["Kahverengi", "Turuncu", "Gri"],
+    image: longEaredOwlImg,
+    letter: "K",
+  },
+  {
+    id: "73",
+    name: "Alaca Baykuş",
+    scientificName: "Strix aluco",
+    region: ["Avrupa", "Batı Asya"],
+    size: "37-43 cm",
+    colors: ["Kahverengi", "Gri", "Benekli"],
+    image: tawnyOwlImg,
+    letter: "A",
+  },
+  {
+    id: "74",
+    name: "İshakkuşu",
+    scientificName: "Otus scops",
+    region: ["Avrupa", "Asya", "Afrika"],
+    size: "19-21 cm",
+    colors: ["Gri-kahverengi", "Kamuflaj"],
+    image: scopsOwlImg,
+    letter: "İ",
+  },
+  {
+    id: "75",
+    name: "Bataklık Baykuşu",
+    scientificName: "Asio flammeus",
+    region: ["Dünya geneli"],
+    size: "33-40 cm",
+    colors: ["Sarımsı-kahverengi", "Çizgili"],
+    image: shortEaredOwlImg,
+    letter: "B",
+  },
+  {
+    id: "76",
+    name: "Atmaca",
+    scientificName: "Accipiter nisus",
+    region: ["Avrupa", "Asya", "Afrika"],
+    size: "29-41 cm",
+    colors: ["Gri-mavi", "Turuncu çizgili"],
+    image: sparrowhawkImg,
+    letter: "A",
+  },
+  {
+    id: "77",
+    name: "Çakır",
+    scientificName: "Accipiter gentilis",
+    region: ["Kuzey Yarımküre"],
+    size: "48-62 cm",
+    colors: ["Gri-kahverengi", "Beyaz kaş"],
+    image: goshawkImg,
+    letter: "Ç",
+  },
+  {
+    id: "78",
+    name: "Şahin",
+    scientificName: "Buteo buteo",
+    region: ["Avrupa", "Asya"],
+    size: "51-57 cm",
+    colors: ["Kahverengi", "Krem", "Değişken"],
+    image: commonBuzzardImg,
+    letter: "Ş",
+  },
+  {
+    id: "79",
+    name: "Kara Çaylak",
+    scientificName: "Milvus migrans",
+    region: ["Avrupa", "Asya", "Afrika", "Avustralya"],
+    size: "55-60 cm",
+    colors: ["Koyu kahverengi", "Siyah"],
+    image: blackKiteImg,
+    letter: "K",
+  },
+  {
+    id: "80",
+    name: "Kızıl Çaylak",
+    scientificName: "Milvus milvus",
+    region: ["Avrupa", "Batı Asya"],
+    size: "60-66 cm",
+    colors: ["Kızıl-kahverengi", "Gri baş"],
+    image: redKiteImg,
+    letter: "K",
+  },
+  {
+    id: "81",
+    name: "Kaya Kartalı",
+    scientificName: "Aquila chrysaetos",
+    region: ["Kuzey Yarımküre"],
+    size: "76-93 cm",
+    colors: ["Koyu kahverengi", "Altın ense"],
+    image: goldenEagleImg,
+    letter: "K",
+  },
+  {
+    id: "82",
+    name: "Kerkenez",
+    scientificName: "Falco tinnunculus",
+    region: ["Avrupa", "Asya", "Afrika"],
+    size: "32-35 cm",
+    colors: ["Kızıl-kahverengi", "Gri baş"],
+    image: kestrelImg,
+    letter: "K",
+  },
+  {
+    id: "83",
+    name: "Delice Doğan",
+    scientificName: "Falco subbuteo",
+    region: ["Avrupa", "Asya", "Afrika"],
+    size: "30-36 cm",
+    colors: ["Gri", "Çizgili", "Kızıl uyluk"],
+    image: hobbyImg,
+    letter: "D",
+  },
+  {
+    id: "84",
+    name: "Küçük Kartal",
+    scientificName: "Hieraaetus pennatus",
+    region: ["Avrupa", "Asya", "Afrika"],
+    size: "42-51 cm",
+    colors: ["Kahverengi", "Beyaz", "Değişken"],
+    image: bootedEagleImg,
+    letter: "K",
+  },
+  {
+    id: "85",
+    name: "Boz Kaz",
+    scientificName: "Anser anser",
+    region: ["Avrupa", "Asya"],
+    size: "74-84 cm",
+    colors: ["Gri-kahverengi", "Turuncu gaga"],
+    image: greylagGooseImg,
+    letter: "B",
+  },
+  {
+    id: "86",
+    name: "Karabaş Patka",
+    scientificName: "Aythya marila",
+    region: ["Kuzey Yarımküre"],
+    size: "42-51 cm",
+    colors: ["Siyah baş", "Beyaz yan", "Gri sırt"],
+    image: greaterScaupImg,
+    letter: "K",
   },
 ];
 
