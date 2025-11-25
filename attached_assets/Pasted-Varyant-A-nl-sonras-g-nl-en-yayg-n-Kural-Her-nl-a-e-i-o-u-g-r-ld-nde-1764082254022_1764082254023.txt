@@ -1,0 +1,202 @@
+Varyant A — “Ünlü sonrası g+ünlü” (en yaygın)
+
+Kural: Her ünlü (a, e, ı, i, o, ö, u, ü) görüldüğünde hemen arkasına g + aynı ünlü eklenir.
+
+a → aga
+
+e → ege
+
+i → igi vb.
+
+Örnek:
+
+su → sugu (s + u → s + u + gu)
+
+anne → agannegene
+
+gel → geligel
+
+Algoritma (encoding):
+
+Girdi: orijinal string (Türkçe).
+
+Karakter karakter sırayla oku.
+
+Eğer karakter bir ünlü ise çıktıya: ünlü + g + aynı ünlü ekle.
+
+Değilse çıktıya olduğu gibi ekle.
+
+Pseudocode:
+
+vowels = set(['a','e','ı','i','o','ö','u','ü'])
+output = ""
+for ch in input:
+    output += ch
+    if ch in vowels:
+        output += 'g' + ch
+return output
+
+
+Decoding (tersini alma):
+
+Okurken bir ünlü bul → sonraki iki karakterin 'g' + aynı ünlü olup olmadığına bak → evet ise bu ekleri atla ve yalnızca bir ünlü yaz → devam et.
+
+Yani basitçe: her ünlüden sonra gelen g+aynı ünlüyü yok say.
+
+Kenardurumlar:
+
+Büyük/küçük harf: algoritmayı case-insensitive yap veya büyük/ küçük koruması için G/büyük ünlüye uyumlu ek yap.
+
+Noktalama/boşluk/sayı: olduğu gibi bırakılabilir.
+
+Ünsüz kümeleri: sorun yok (sadece ünlüler etkilenir).
+
+Varyant B — “Her heceye ekleme” (hece tabanlı)
+
+Kural: Her hece sonuna sabit bir hece eklenir (ör. pa → papa, şehir → şehirbir gibi). Bölgesel çeşitleri var: -ma, -po, -ci, -ga vs.
+
+Örnek (basit):
+
+su → suma (hece sonuna ma)
+
+gel → gelma
+
+Algoritma (encoding):
+
+Önce kelimeyi hecelere ayır (Türkçede hece ayırma kurallarına göre).
+
+Her hecenin sonuna sabit hece ekle.
+
+Birleştir.
+
+Hecelere ayırma (basitleştirilmiş kural):
+
+Türkçede tipik hece: (C)(C)V(C) — ama tam uygulama biraz karmaşık; pratikte vowel gördüğünde yeni hece başlar.
+
+Decoding: hece sınırlarına göre ekleri çıkar.
+
+Not: Bu varyant programatik olarak biraz daha karmaşık çünkü hece ayırma gerektirir.
+
+Varyant C — “Ünsüz işareti + ünlü eklenti” (daha az yaygın)
+
+Kural: Her ünsüzden sonra özel bir hece eklenir (ör. k → kak, r → rar). Bazen hem ünlü hem ünsüz kombinasyonu kullanılır.
+
+Örnek:
+
+kedi → kakeregidi (çeşitli uygulamalar görülebiliyor)
+
+3. Teknik detaylar — fonetik mantık
+
+Temel amaç: orijinal prosodiyi koruyup sesi değiştirmek, böylece ıslık dili gibi değil ama gizli konuşma oluyor.
+
+Varyant A, prosodiyi en az bozan ve en sık kullanılanıdır çünkü ünlüler Türkçede zorunlu ve ayırt edicidir; onları çoğaltmak kelimenin ritmini bozar ama geri çevrilebilir.
+
+Bu algoritmalar bilinen bir kurala bağlı olduğundan, hem insanlar hem de otomatik betikler kolayca encode/decode yapabilir.
+
+4. Tersine çevirme algoritması (generik)
+
+Varyant A için adım adım (robust):
+
+Decoding algoritması (Varyant A, güvenli):
+
+i = 0
+
+while i < len(s):
+a. ch = s[i]
+b. append ch to output
+c. if ch in vowels and i+2 < len(s) and s[i+1]=='g' and s[i+2]==ch:
+i += 3 # ünlü + g + aynı ünlü atla
+else:
+i += 1
+
+return output
+
+Bu, yanlış pozitifleri engellemeye çalışır (ör. gerçek metinde g harfi varsa dikkat).
+
+5. Regex tabanlı ifade (Varyant A)
+
+Encode: regex ile doğrudan yapılandırmak zor, genelde karakter tabanlı döngü daha güvenli.
+
+Decode (basit): re.sub(r'([aeıioöuü])g\1', r'\1', s)
+— Bu Python/PCRE ifadesi a g a gibi kalıpları tek a'ya indirger.
+
+6. Programatik örnek (Python-benzeri psödo)
+def encode_varyantA(s):
+    vowels = "aeıioöuüAEIİOÖUÜ"
+    out = []
+    for ch in s:
+        out.append(ch)
+        if ch in vowels:
+            # orijinal harfin case'ini korumak için:
+            if ch.isupper():
+                out.append('G' + ch)  
+            else:
+                out.append('g' + ch)
+    return "".join(out)
+
+def decode_varyantA(s):
+    vowels = "aeıioöuüAEIİOÖUÜ"
+    i = 0
+    out = []
+    while i < len(s):
+        ch = s[i]
+        out.append(ch)
+        if ch in vowels and i+2 < len(s) and s[i+1] in ('g','G') and s[i+2] == ch:
+            i += 3
+        else:
+            i += 1
+    return "".join(out)
+
+7. Kenar durumlar ve güvenlik
+
+Orijinal metinde g harfinin takip ettiği aynı ünlü varsa (ör. aga kelimesi), decode algoritması bunu yanlış algılayabilir. Ancak decode kontrolü s[i+1]=='g' and s[i+2]==ch olduğu için yalnızca uygun kalıpyı atlar — dolayısıyla orijinal metin aga ise encode sonrası agagaga olur; decode yine doğru çalışır. Yine de bazı nadir istisnalar olabilir; bu yüzden iki yönlü test önerilir (encode→decode→karşılaştır).
+
+Kodlamayı tek yönlü değil, mutlak geri dönüşümlü yapmak istiyorsanız:
+
+Ek karakter(ler) olarak her zaman sabit bir işaret kullanın ve orijinal metinde o işaretler varsa escape mekanizması kurun (ör. \g gibi).
+
+Bu, protokolleri sağlamlaştırır.
+
+8. Karmaşık uygulamalar — varyant karışımı
+
+Bazı gruplar hem ünlü kuralı hem ünsüz işareti kullanır. Örneğin: ünlülerde g+ünlü, ünsüzlerde p eklemesi. Bu, kod çözümü daha zor hale getirir — ama hâlâ deterministikse çözülebilir.
+
+9. Analiz — zaman/uzay karmaşıklığı
+
+Encoding ve decoding her karakteri sabit sayıda işlemle işler → O(n) zaman, O(n) ekstra alan (çıktı).
+
+Hecelere dayanan varyantlarda hece ayırma adımı ek karmaşıklık getirebilir, ama pratikte yine lineer yaklaşımlar vardır.
+
+10. Uygulama/öğretim notları ve alıştırmalar
+
+Başlangıç: su, el, anne, kedi, şehir gibi kısa kelimelerle pratik yapın.
+
+İleri: kısa cümleler: Nasılsın? → Nagasıgılsıgın? (Varyant A) gibi.
+
+Test: encode ettikten sonra decode edip orijinali elde ettiğinizden emin olun.
+
+Oyun: iki kişilik şifreli sohbetler; üçüncü kişiye anlamasını yasaklayın.
+
+11. Bölgesel farklılıklar (kısa)
+
+Türkiye’de farklı illerde hafif farklı ekler ve kurallar görülür. Kimi yerlerde g yerine k veya p kullanılır; kimi yerlerde ünsüzleri de işaret ederler. Temel mantık aynıdır: deterministik bir ekleme yapıp dilin anlaşılmasını dışarıya kapatmak.
+
+12. Örnekli bütünleşik dönüşüm (Varyant A)
+
+Girdi: Merhaba, nasılsın?
+
+Adım adım:
+
+M e r h a b a , → M e g e r h a g a b a g a ,
+
+n a s ı l s ı n ? → n a g a s ı g ı l s ı g ı n ?
+
+Sonuç: Megerhagabag a, nagasığısıgın? (büyük harf/boşluk/noktalama korunur; pratikte biraz farklı yazım görülebilir — dikkat: örnekte boşluk yanlış yerleşmiş olabilir; gerçek uygulama karakter-karakter uygulanmalı.)
+
+13. Hızlı uygulama ipuçları
+
+Programlama için karakter iterasyonu en güvenli yöntem. Regex decode için re.sub çok pratik.
+
+Hem insan hem makine kullanımında büyük/küçük harf ve noktalama davranışınızı baştan belirleyin.
+
+Orijinal metinde benzer kalıplar varsa escape/marker stratejisi ekleyin.
