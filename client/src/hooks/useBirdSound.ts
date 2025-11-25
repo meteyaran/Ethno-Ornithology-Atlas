@@ -15,6 +15,8 @@ interface Recording {
   loc: string;
   rec: string;
   q: string;
+  length: string;
+  en: string;
 }
 
 interface ApiResponse {

@@ -1,9 +1,27 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Volume2, VolumeX, Play, Pause, Loader2 } from "lucide-react";
+import { Volume2, VolumeX, Play, Pause, Loader2, Music, Radio } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useBirdSound } from "@/hooks/useBirdSound";
+
+function AudioWaveAnimation({ isPlaying }: { isPlaying: boolean }) {
+  return (
+    <div className="flex items-center justify-center gap-[3px] h-8">
+      {[...Array(5)].map((_, i) => (
+        <div
+          key={i}
+          className={`w-1 bg-primary rounded-full transition-all duration-150 ${
+            isPlaying ? 'animate-sound-wave' : 'h-2'
+          }`}
+          style={{
+            animationDelay: isPlaying ? `${i * 0.1}s` : '0s',
+            height: isPlaying ? undefined : '8px'
+          }}
+        />
+      ))}
+    </div>
+  );
+}
 
 interface BirdSoundPlayerProps {
   scientificName: string;
@@ -156,16 +174,51 @@ export function BirdSoundPlayer({ scientificName, birdName }: BirdSoundPlayerPro
         />
 
         {currentRecording.sono && currentRecording.sono.small && (
-          <div className="mt-4">
-            <img
-              src={currentRecording.sono.small.startsWith('http') 
-                ? currentRecording.sono.small 
-                : `https:${currentRecording.sono.small}`}
-              alt={`${birdName} sesinin spektrogramı`}
-              className="w-full rounded-md border border-border"
-            />
-            <p className="text-xs text-muted-foreground mt-2">
-              Ses spektrogramı - Kaynak: Xeno-canto
+          <div className="mt-5 space-y-3">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Radio className="h-4 w-4" />
+              <span>Ses Spektrogramı</span>
+              <AudioWaveAnimation isPlaying={isPlaying} />
+            </div>
+            
+            <div className={`relative group rounded-lg overflow-hidden ${isPlaying ? 'ring-2 ring-primary/50' : ''}`}>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 z-10 pointer-events-none" />
+              
+              <img
+                src={currentRecording.sono.med 
+                  ? (currentRecording.sono.med.startsWith('http') 
+                      ? currentRecording.sono.med 
+                      : `https:${currentRecording.sono.med}`)
+                  : (currentRecording.sono.small.startsWith('http') 
+                      ? currentRecording.sono.small 
+                      : `https:${currentRecording.sono.small}`)}
+                alt={`${birdName} sesinin spektrogramı`}
+                className={`w-full h-32 object-cover transition-all duration-500 ${
+                  isPlaying ? 'scale-[1.02] brightness-110' : 'brightness-90'
+                }`}
+              />
+              
+              {isPlaying && (
+                <div className="absolute inset-0 z-20 pointer-events-none">
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary/80 animate-spectrum-scan" />
+                </div>
+              )}
+              
+              <div className="absolute bottom-2 left-3 right-3 z-20 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Music className="h-3 w-3 text-white/80" />
+                  <span className="text-xs text-white/80 font-medium">
+                    {currentRecording.length || "0:00"}
+                  </span>
+                </div>
+                <span className="text-xs text-white/60 bg-black/40 px-2 py-0.5 rounded">
+                  {currentRecording.type || "Ses"}
+                </span>
+              </div>
+            </div>
+            
+            <p className="text-xs text-muted-foreground text-center">
+              Kaynak: Xeno-canto ({currentRecording.cnt})
             </p>
           </div>
         )}
