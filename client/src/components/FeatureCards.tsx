@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Mic, Brain, Globe, Languages, Volume2 } from "lucide-react";
+import { BirdSearch } from "./BirdSearch";
 
 const features = [
   {
@@ -38,30 +39,35 @@ const features = [
 export function FeatureCards() {
   return (
     <section className="bg-background py-6 px-4 md:px-6">
-      <div className="container mx-auto max-w-4xl">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-          {features.map((feature) => (
-            <Link 
-              key={feature.testId} 
-              href={feature.tabParam ? `${feature.href}?tab=${feature.tabParam}` : feature.href}
-            >
-              <Card 
-                className="h-full hover-elevate cursor-pointer border-primary/20 hover:border-primary/40 transition-colors"
-                data-testid={feature.testId}
+      <div className="container mx-auto max-w-5xl">
+        <div className="flex flex-col md:flex-row items-stretch gap-4">
+          <div className="flex items-center justify-center md:justify-start">
+            <BirdSearch />
+          </div>
+          <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            {features.map((feature) => (
+              <Link 
+                key={feature.testId} 
+                href={feature.tabParam ? `${feature.href}?tab=${feature.tabParam}` : feature.href}
               >
-                <CardContent className="p-4 flex flex-col items-center text-center gap-2">
-                  <div className="flex items-center justify-center gap-1 text-primary">
-                    <feature.icon className="w-6 h-6" />
-                    {feature.secondIcon && <feature.secondIcon className="w-4 h-4" />}
-                  </div>
-                  <h3 className="font-semibold text-sm leading-tight">{feature.title}</h3>
-                  <p className="text-xs text-muted-foreground line-clamp-2 hidden sm:block">
-                    {feature.description}
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+                <Card 
+                  className="h-full hover-elevate cursor-pointer border-primary/20 hover:border-primary/40 transition-colors"
+                  data-testid={feature.testId}
+                >
+                  <CardContent className="p-4 flex flex-col items-center text-center gap-2">
+                    <div className="flex items-center justify-center gap-1 text-primary">
+                      <feature.icon className="w-6 h-6" />
+                      {feature.secondIcon && <feature.secondIcon className="w-4 h-4" />}
+                    </div>
+                    <h3 className="font-semibold text-sm leading-tight">{feature.title}</h3>
+                    <p className="text-xs text-muted-foreground line-clamp-2 hidden sm:block">
+                      {feature.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </section>
