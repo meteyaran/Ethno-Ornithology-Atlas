@@ -470,7 +470,7 @@ export const birds: Bird[] = [
   {
     id: "38",
     name: "Kara Gagalı Sumru",
-    scientificName: "Sterna sandvicensis",
+    scientificName: "Thalasseus sandvicensis",
     region: ["Avrupa", "Afrika"],
     size: "36-41 cm",
     colors: ["Beyaz", "Siyah", "Sarı"],
@@ -560,7 +560,7 @@ export const birds: Bird[] = [
   {
     id: "47",
     name: "Büyük Ak Balıkçıl",
-    scientificName: "Casmerodius albus",
+    scientificName: "Ardea alba",
     region: ["Dünya geneli"],
     size: "85-102 cm",
     colors: ["Beyaz"],
@@ -630,7 +630,7 @@ export const birds: Bird[] = [
   {
     id: "54",
     name: "Fiyu",
-    scientificName: "Anas penelope",
+    scientificName: "Mareca penelope",
     region: ["Avrupa", "Asya"],
     size: "42-50 cm",
     colors: ["Gri", "Pembe-kahverengi", "Krem"],
@@ -640,7 +640,7 @@ export const birds: Bird[] = [
   {
     id: "55",
     name: "Boz Ördek",
-    scientificName: "Anas strepera",
+    scientificName: "Mareca strepera",
     region: ["Kuzey Yarımküre"],
     size: "46-56 cm",
     colors: ["Gri-kahverengi", "Beyaz"],
@@ -680,7 +680,7 @@ export const birds: Bird[] = [
   {
     id: "59",
     name: "Çıkrıkçın",
-    scientificName: "Anas querquedula",
+    scientificName: "Spatula querquedula",
     region: ["Avrupa", "Asya"],
     size: "37-41 cm",
     colors: ["Gri-kahverengi", "Beyaz", "Mavi-gri"],
@@ -690,7 +690,7 @@ export const birds: Bird[] = [
   {
     id: "60",
     name: "Kaşıkgaga",
-    scientificName: "Anas clypeata",
+    scientificName: "Spatula clypeata",
     region: ["Kuzey Yarımküre"],
     size: "44-52 cm",
     colors: ["Yeşil", "Beyaz", "Kahverengi"],
