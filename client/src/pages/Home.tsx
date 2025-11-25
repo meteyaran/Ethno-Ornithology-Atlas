@@ -1,4 +1,5 @@
 import { Hero } from "@/components/Hero";
+import { FeatureCards } from "@/components/FeatureCards";
 import { AlphabetNav } from "@/components/AlphabetNav";
 import { BirdGallery } from "@/components/BirdGallery";
 import { groupBirdsByLetter, getAllLetters } from "@/data/birds";
@@ -31,6 +32,7 @@ export default function Home() {
       </div>
       
       <Hero />
+      <FeatureCards />
       <AlphabetNav 
         letters={letters} 
         activeSection={activeSection}

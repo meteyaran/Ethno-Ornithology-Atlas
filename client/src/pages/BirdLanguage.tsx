@@ -140,7 +140,16 @@ export default function BirdLanguage() {
   const [direction, setDirection] = useState<TranslationDirection>('encode');
   const [variant, setVariant] = useState<ConsonantVariant>('g');
   const [copied, setCopied] = useState(false);
+  const [activeTab, setActiveTab] = useState('translator');
   const { toast } = useToast();
+  
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get('tab');
+    if (tabParam === 'whistle') {
+      setActiveTab('whistle');
+    }
+  }, []);
   
   useEffect(() => {
     const savedVariant = localStorage.getItem('birdLanguageVariant');
@@ -227,7 +236,7 @@ export default function BirdLanguage() {
           </p>
         </div>
         
-        <Tabs defaultValue="translator" className="mb-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
           <TabsList className="grid w-full grid-cols-2 mb-6">
             <TabsTrigger value="translator" className="gap-2" data-testid="tab-translator">
               <Languages className="w-4 h-4" />
