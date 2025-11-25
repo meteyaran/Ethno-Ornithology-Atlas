@@ -4,7 +4,7 @@ import { AlphabetNav } from "@/components/AlphabetNav";
 import { BirdGallery } from "@/components/BirdGallery";
 import { groupBirdsByLetter, getAllLetters } from "@/data/birds";
 import { useState } from "react";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { SettingsBar } from "@/components/SettingsBar";
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState<string>("");
@@ -27,8 +27,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="absolute top-6 right-6 z-50">
-        <ThemeToggle />
+      <div className="absolute top-4 right-4 z-50">
+        <SettingsBar />
       </div>
       
       <Hero />
