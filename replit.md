@@ -167,3 +167,32 @@ Preferred communication style: Simple, everyday language.
 - 92% accuracy on validation set
 - Supports 6,522 bird species globally
 - Real inference active (not demo mode)
+
+### World Distribution Map System (eBird API)
+
+**Architecture**
+- eBird API v2 integration for global bird observation data
+- Dynamic taxonomy lookup for accurate species codes
+- Interactive Leaflet maps with multiple layer types
+- Clustering algorithm for observation density visualization
+
+**API Endpoints**
+- `GET /api/ebird/global/:speciesCode`: Recent observations from major countries worldwide (7/14/30 days)
+- `GET /api/ebird/historical/:speciesCode`: Historical observations with year/month range filtering (1900-present)
+- `GET /api/ebird/taxonomy`: Species code lookup from scientific names
+- `GET /api/ebird/nearby`: Location-based observation queries
+
+**Frontend Features (BirdDistributionMap.tsx)**
+- Time mode tabs: "Son Günler" (Recent) vs "Tarihsel" (Historical)
+- Recent mode: 7, 14, or 30 day observation windows
+- Historical mode: Year range selector (1900-2025), Month range selector (1-12)
+- Quick presets: "Tüm Yıllar" (All Years), "Son 10 Yıl", "Son 5 Yıl", "İlkbahar" (Spring), "Sonbahar" (Autumn)
+- Map layers: Street, Terrain, Satellite, Hybrid views
+- Legend showing observation density colors and native/exotic species indicators
+- Clustered markers with count badges
+
+**Data Visualization**
+- Color-coded observation density: Green (1-4) → Cyan (5-9) → Blue (10-19) → Purple (20-99) → Violet (100+)
+- Red markers for exotic/introduced species
+- Native species count displayed separately from exotic species
+- Location clustering based on zoom level
