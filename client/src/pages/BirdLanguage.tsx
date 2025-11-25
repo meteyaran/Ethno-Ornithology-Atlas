@@ -80,7 +80,19 @@ function translateText(
   }
 }
 
-const whistleExamples = {
+interface WhistleExample {
+  turkish: string;
+  whistle: string;
+  whistle2?: string;
+  note: string;
+}
+
+const whistleExamples: {
+  greetings: WhistleExample[];
+  commands: WhistleExample[];
+  sentences: WhistleExample[];
+  realWorld: WhistleExample[];
+} = {
   greetings: [
     { turkish: "Merhaba!", whistle: "wiii–tüü–fiit!", note: "Selamlaşma" },
     { turkish: "Nasılsın?", whistle: "fiii–tü–wii? (yükselen ton)", note: "Soru" },
@@ -100,11 +112,16 @@ const whistleExamples = {
     { turkish: "Bugün köye iniyorum.", whistle: "fuu(↓↓)—•gii(↑)—•köö(↓~↓)—•nii(↓).", note: "Karmaşık cümle" },
   ],
   realWorld: [
-    { turkish: "Aliiii! Neredesin?", whistle: "fiüüüü—↑↑—↓! + tii↑—fiii↓~fii?", note: "İsim çağrısı + soru" },
-    { turkish: "Sürü dağıldı!", whistle: "fööö↓—•tíí↑—•TÜÜÜ↓!", note: "Acil haber" },
-    { turkish: "Çabuk gel!", whistle: "tii↑!—TÜÜÜ↓!", note: "İki parçalı; emir vurgusu" },
-    { turkish: "Yarın yağmur var!", whistle: "yaa(↓)~yaa(↑)—•fii↑—•vaa(↓)!", note: "Hava durumu" },
-    { turkish: "Ben evdeyim!", whistle: "tii↓—•mii↓•e↑~e↑—•dii↓•yii↓", note: "Konum bildirme" },
+    { 
+      turkish: "Aliiii! Neredesin?", 
+      whistle: "A-lííííí! → fiüüüü—↑↑—↓!", 
+      whistle2: "neree↑—•deeesiiin↓? → tii↑—fiii↓~fii?",
+      note: "İki parçalı: (1) İsim çağrısı - ilk sesli harf uzatılır, sonunda keskin iniş; (2) Soru cümlesi" 
+    },
+    { turkish: "Sürü dağıldı!", whistle: "fööö↓—•tíí↑—•TÜÜÜ↓!", note: "Acil haber - 'dağıldı' kelimesinde iniş-boom yapılır" },
+    { turkish: "Çabuk gel!", whistle: "tii↑!—TÜÜÜ↓!", note: "İki parçalı; ikinci hece emir vurgusu" },
+    { turkish: "Yarın yağmur var!", whistle: "yaa(↓)~yaa(↑)—•fii↑—•vaa(↓)!", note: "Hava durumu bildirimi" },
+    { turkish: "Ben evdeyim!", whistle: "tii↓—•mii↓•e↑~e↑—•dii↓•yii↓", note: "Konum bildirme - birleştirilmiş akış" },
   ],
 };
 
@@ -223,7 +240,7 @@ export default function BirdLanguage() {
           </TabsList>
           
           <TabsContent value="translator" className="space-y-6">
-            <Card>
+            <Card data-testid="card-direction">
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2">
                   <ArrowRightLeft className="w-5 h-5" />
@@ -268,7 +285,7 @@ export default function BirdLanguage() {
               </CardContent>
             </Card>
             
-            <Card>
+            <Card data-testid="card-variant">
               <CardHeader className="pb-4">
                 <CardTitle>Varyant Seçimi</CardTitle>
                 <CardDescription>
@@ -294,7 +311,7 @@ export default function BirdLanguage() {
             </Card>
             
             <div className="grid md:grid-cols-2 gap-4">
-              <Card>
+              <Card data-testid="card-input">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base flex items-center justify-between">
                     <span>{direction === 'encode' ? 'Türkçe Metin' : 'Kuş Dili Metin'}</span>
@@ -337,7 +354,7 @@ export default function BirdLanguage() {
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card data-testid="card-output">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base flex items-center justify-between">
                     <span>{direction === 'encode' ? 'Kuş Dili' : 'Türkçe'}</span>
@@ -369,7 +386,7 @@ export default function BirdLanguage() {
               </Card>
             </div>
             
-            <Card>
+            <Card data-testid="card-explanation">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Bird className="w-5 h-5" />
@@ -399,7 +416,7 @@ export default function BirdLanguage() {
           </TabsContent>
           
           <TabsContent value="whistle" className="space-y-6">
-            <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+            <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent" data-testid="card-unesco">
               <CardHeader>
                 <div className="flex items-start gap-4">
                   <div className="p-3 rounded-full bg-primary/10">
@@ -415,8 +432,18 @@ export default function BirdLanguage() {
               </CardHeader>
             </Card>
             
+            <Card className="border-yellow-500/30 bg-yellow-500/5" data-testid="card-warning">
+              <CardContent className="pt-4">
+                <p className="text-sm text-muted-foreground">
+                  <strong className="text-yellow-600 dark:text-yellow-400">Önemli Uyarı:</strong> Islık dili, konuşulan Türkçeyi birebir seslendirme üzerine kurulu olduğu için 
+                  metin ile tam temsil edilemez. Aşağıda verilen örnekler —uzunluk, tonlama, iniş–çıkış çizgileriyle birlikte— 
+                  yalnızca <strong>öğretici amaçlıdır</strong>. Yazılı biçim eğitim formatı içindir ve gerçek ıslık seslerini dinleyerek öğrenmek gereklidir.
+                </p>
+              </CardContent>
+            </Card>
+            
             <div className="grid md:grid-cols-2 gap-6">
-              <Card>
+              <Card data-testid="card-location">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <MapPin className="w-5 h-5" />
@@ -438,7 +465,7 @@ export default function BirdLanguage() {
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card data-testid="card-history">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <BookOpen className="w-5 h-5" />
@@ -461,7 +488,7 @@ export default function BirdLanguage() {
               </Card>
             </div>
             
-            <Card>
+            <Card data-testid="card-notation">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Music className="w-5 h-5" />
@@ -521,7 +548,7 @@ export default function BirdLanguage() {
               </CardContent>
             </Card>
             
-            <Card>
+            <Card data-testid="card-examples">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Volume2 className="w-5 h-5" />
@@ -533,9 +560,9 @@ export default function BirdLanguage() {
               </CardHeader>
               <CardContent>
                 <Accordion type="single" collapsible className="w-full">
-                  <AccordionItem value="greetings">
-                    <AccordionTrigger>Basit Selamlaşmalar</AccordionTrigger>
-                    <AccordionContent>
+                  <AccordionItem value="greetings" data-testid="accordion-greetings">
+                    <AccordionTrigger data-testid="accordion-trigger-greetings">Basit Selamlaşmalar</AccordionTrigger>
+                    <AccordionContent data-testid="accordion-content-greetings">
                       <div className="space-y-3">
                         {whistleExamples.greetings.map((ex, i) => (
                           <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 rounded-lg bg-muted/30">
@@ -550,9 +577,9 @@ export default function BirdLanguage() {
                     </AccordionContent>
                   </AccordionItem>
                   
-                  <AccordionItem value="commands">
-                    <AccordionTrigger>Hayvan Yönetimi Komutları</AccordionTrigger>
-                    <AccordionContent>
+                  <AccordionItem value="commands" data-testid="accordion-commands">
+                    <AccordionTrigger data-testid="accordion-trigger-commands">Hayvan Yönetimi Komutları</AccordionTrigger>
+                    <AccordionContent data-testid="accordion-content-commands">
                       <div className="space-y-3">
                         {whistleExamples.commands.map((ex, i) => (
                           <div key={i} className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 rounded-lg bg-muted/30">
@@ -567,9 +594,9 @@ export default function BirdLanguage() {
                     </AccordionContent>
                   </AccordionItem>
                   
-                  <AccordionItem value="sentences">
-                    <AccordionTrigger>Tonlama ve Yön İşaretli Cümleler</AccordionTrigger>
-                    <AccordionContent>
+                  <AccordionItem value="sentences" data-testid="accordion-sentences">
+                    <AccordionTrigger data-testid="accordion-trigger-sentences">Tonlama ve Yön İşaretli Cümleler</AccordionTrigger>
+                    <AccordionContent data-testid="accordion-content-sentences">
                       <div className="mb-4 p-3 rounded-lg bg-primary/5 border border-primary/20">
                         <p className="text-sm text-muted-foreground">
                           <strong>Notasyon:</strong> ↑ yükselme, ↓ düşme, ~ dalgalanma, • hece ayırıcı, — uzama
@@ -589,32 +616,42 @@ export default function BirdLanguage() {
                     </AccordionContent>
                   </AccordionItem>
                   
-                  <AccordionItem value="realworld">
-                    <AccordionTrigger>Günlük Kullanım ve Uzaktan Haberleşme</AccordionTrigger>
-                    <AccordionContent>
+                  <AccordionItem value="realworld" data-testid="accordion-realworld">
+                    <AccordionTrigger data-testid="accordion-trigger-realworld">Günlük Kullanım ve Uzaktan Haberleşme</AccordionTrigger>
+                    <AccordionContent data-testid="accordion-content-realworld">
                       <div className="mb-4 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
                         <p className="text-sm">
                           Kuşköy'de yüksek mesafe haberleşmesinde cümleler sadeleştirilir. 
                           Aşağıdaki örnekler gerçek kullanıma yakın notasyonlardır.
                         </p>
                       </div>
+                      <div className="mb-4 p-3 rounded-lg bg-primary/5 border border-primary/20">
+                        <p className="text-sm text-muted-foreground">
+                          <strong>Notasyon Anahtarı:</strong> ↑ yükselme, ↓ düşme, ~ dalgalanma, • hece ayırıcı, — uzama, () frekans bilgisi
+                        </p>
+                      </div>
                       <div className="space-y-3">
                         {whistleExamples.realWorld.map((ex, i) => (
-                          <div key={i} className="p-3 rounded-lg bg-muted/30">
-                            <div className="flex flex-col sm:flex-row sm:items-start gap-2 mb-2">
-                              <span className="font-medium flex-shrink-0">{ex.turkish}</span>
-                              <span className="font-mono text-primary text-sm break-all">{ex.whistle}</span>
+                          <div key={i} className="p-3 rounded-lg bg-muted/30" data-testid={`whistle-example-realworld-${i}`}>
+                            <div className="flex flex-col gap-2 mb-2">
+                              <span className="font-medium" data-testid={`whistle-turkish-${i}`}>{ex.turkish}</span>
+                              <div className="space-y-1">
+                                <span className="font-mono text-primary text-sm block" data-testid={`whistle-notation-${i}`}>{ex.whistle}</span>
+                                {ex.whistle2 && (
+                                  <span className="font-mono text-primary text-sm block" data-testid={`whistle-notation2-${i}`}>{ex.whistle2}</span>
+                                )}
+                              </div>
                             </div>
-                            <p className="text-xs text-muted-foreground">{ex.note}</p>
+                            <p className="text-xs text-muted-foreground" data-testid={`whistle-note-${i}`}>{ex.note}</p>
                           </div>
                         ))}
                       </div>
                     </AccordionContent>
                   </AccordionItem>
                   
-                  <AccordionItem value="levels">
-                    <AccordionTrigger>Üç Seviyede Islıklaştırma Örneği</AccordionTrigger>
-                    <AccordionContent>
+                  <AccordionItem value="levels" data-testid="accordion-levels">
+                    <AccordionTrigger data-testid="accordion-trigger-levels">Üç Seviyede Islıklaştırma Örneği</AccordionTrigger>
+                    <AccordionContent data-testid="accordion-content-levels">
                       <div className="mb-4">
                         <p className="font-medium mb-2">Cümle: "Şimdi geliyorum!"</p>
                       </div>
@@ -645,7 +682,7 @@ export default function BirdLanguage() {
               </CardContent>
             </Card>
             
-            <Card>
+            <Card data-testid="card-consonants">
               <CardHeader>
                 <CardTitle>Ünsüzlerin Temsili</CardTitle>
                 <CardDescription>Ünsüzler doğrudan duyulmaz; hece giriş/çıkış hızları ile temsil edilir</CardDescription>
@@ -672,7 +709,7 @@ export default function BirdLanguage() {
               </CardContent>
             </Card>
             
-            <Card className="bg-muted/30">
+            <Card className="bg-muted/30" data-testid="card-facts">
               <CardHeader>
                 <CardTitle className="text-base">Ilginç Bilgiler</CardTitle>
               </CardHeader>

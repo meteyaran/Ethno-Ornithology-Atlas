@@ -221,4 +221,35 @@ Preferred communication style: Simple, everyday language.
 - Settings persistence via localStorage
 - Informational section explaining Kuş Dili history
 
-**Route**: `/kus-dili`
+### Kuşköy Whistle Language (Islık Dili)
+
+**UNESCO Heritage Information**
+- UNESCO Intangible Cultural Heritage (2017)
+- Ancient communication method from Kuşköy village, Giresun province
+- Reaches 2-3 km in mountainous terrain
+- Frequency range: 1000-4000 Hz
+
+**Three-Level Notation System**
+- Beginner: Basic syllable representation (fii—↑•tii—↓•gii—↑!)
+- Intermediate: Vowel-tone distinction with pitch markers
+- Expert: Full acoustic description with frequency details and Kuşköy patterns
+
+**Mathematical Notation Symbols**
+- ↑ Rising tone, ↓ Falling tone, ~ Oscillation
+- • Syllable separator, — Extension
+- () Frequency information
+- Uppercase: Emphasis/command endings
+
+**Example Categories**
+- Basic greetings (Merhaba, Nasılsın?)
+- Animal herding commands (Sağa!, Sola!, Dur!)
+- Complex sentences with tone/direction markers
+- Real-world dual-phrase examples (Aliiii! Neredesin?)
+
+**WhistleExample Interface**
+- turkish: string (original Turkish text)
+- whistle: string (primary notation)
+- whistle2?: string (optional second phrase for multi-part utterances)
+- note: string (explanation/context)
+
+**Route**: `/kus-dili` (shared with Kuş Dili translator via tabs)
