@@ -1,0 +1,144 @@
+UYARI: Islık dili konuşulan Türkçeyi birebir seslendirme üzerine kurulu olduğu için metin ile tam temsil edilemez. Aşağıda verilen örnekler —uzunluk, tonlama, iniş–çıkış çizgileriyle birlikte— öğretici amaçlıdır. Yazılı biçim yalnızca eğitim formatı içindir.
+
+✔ Basit Selamlaşmalar
+Türkçe	Islık Dili (yazılı temsili)
+“Merhaba!”	wiii–tüü–fiit!
+“Nasılsın?”	fiii–tü–wii? (yükselen ton)
+“İyiyim.”	tüü–füü.
+“Gel buraya!”	fiii—fii—TÜÜÜ! (uzayan son hece → emir)
+✔ Mekânsal Çağrı (en tipik kullanım)
+Türkçe	Yazılı Temsil	Teknik Açıklama
+“Aliiii!”	fiüüüü—üü—wiii!	İsimlerin ilk sesli harfi uzatılır, sonunda kısa bir keskin iniş yapılır.
+“Çoban, sürü dağıldı!”	tüü–fiii–wii—TÜÜÜ!	“dağıldı” kelimesinde iniş-boom (çöküş) yapılır.
+✔ Hayvan Yönetimi
+Türkçe	Islık Temsili	Not
+“Sağa!”	tüüt!	Tek atımlı sert komut.
+“Sola!”	füüt!	Daha kalın frekans.
+“Dur!”	Tİİİİİ!	Çok keskin, ince ve ani.
+2) Kuşköy Islık Dilinin Teknik Yapısı — Eğitim İçin Temel Modüller
+
+Aşağıdaki modüller bir eğitim sitesini bilimsel ve pratik şekilde yapılandırmak için yeterli derinlik sağlar.
+
+Modül 1 — Temel Akustik (Zorunlu Bölüm)
+
+Kuşköy’de ıslığın iletişim gücü 3 fiziksel parametreye dayanır:
+
+1) Frekans (Keskinlik / İncelik)
+
+/i/ ve /e/ benzeri ünlüler: yüksek frekans (ince ıslık)
+
+/o/ /u/ benzeri ünlüler: düşük frekans (kalın ıslık)
+
+/a/: orta frekans
+
+2) Süre (Hece Uzunluğu)
+
+uzun ıslık: vurgu, ünlem, emir
+
+kısa darbeler: hece bölme, kelime geçişi
+
+3) Gövde → Yön Değişim Hareketi
+
+İnmelik: ❯ sesi alçalarak
+
+Çıkmalık: ❮ sesi yükselerek
+
+Dalgalı: ~ bilgi yoğunluğu arttıkça kullanılır
+
+Modül 2 — Türkçenin Ses Dönüşümü
+
+Islık dili bir işaret dili değil, fonetik kodlamadır. Bu yüzden sistem şu dönüşümlere sahiptir:
+
+Ünlüler (soyut standartlaştırma)
+Ünlü	Frekans	Şekil
+a	orta	düz iniş
+e	ince	hızlı çıkış
+i	çok ince	sivri tırmanış
+o	kalın	geniş yay çizgisi
+u	çok kalın	derin dalga
+ö/ü	ince-kalın geçişli	zikzak
+Ünsüzler (ısıklı kesim teknikleri)
+
+Ünsüzler direkt duyulmaz; hece giriş/çıkış hızları ile temsil edilir:
+
+k/g → ani kesiş
+
+t/d → kısa çarpma
+
+s/ş → titreşimli minik dalga
+
+m/n → süren, yumuşak iniş
+
+r → mikro-tril (küçük modülasyon)
+
+Modül 3 — Söz Dizimi
+
+Islık dili Türkçe söz dizimini korur:
+
+“/İsim/ + gel!”
+
+“/Yer/ + /yüklem/”
+
+“/Kişi/ + nerde?”
+
+Pratikte cümleler daha kısa iletilir.
+
+Modül 4 — İletim Tekniği
+
+Köylüler arasında standartlaşan üretim şu şekildedir:
+
+Dil kökünü yukarı koy
+
+İki parmak veya iç dudak ile ıslık oluştur
+
+Dişlere yakın dar hava geçidi yarat
+
+Hece değişiminde hava akışını tamamen kesme → yarım kesme uygula
+
+Ton değişikliği için dil gövdesinin yüksekliğini değiştir
+
+3) Bir Eğitim Sitesi İçin Yol Haritası
+A) İçerik Yapısı
+
+Bu sırayı takip edebilirsin:
+
+Kuşköy ıslık dili nedir? (tarih + UNESCO bilgi kartı)
+
+Nasıl ses üretilir? (videolu bölüm)
+
+Temel akustik ve frekans eğitimi
+
+Ünlü-ünsüz ıslık karşılıkları
+
+İlk kelimeler
+
+Basit cümleler
+
+Coğrafi kullanım örnekleri (harita + tipik çağrılar)
+
+Kayıt analizi bölümü (spektrum görüntüleri)
+
+Oyunlaştırma: öğrencinin ıslığını frekans analizi ile ölçme
+
+Topluluk / forum bölümü
+
+B) Kullanabileceğin Teknik Araçlar
+
+WebAudio API → kullanıcı ıslığını analiz etmek için
+
+Pitch detection kütüphaneleri (meyda.js gibi)
+
+Canvas / Chart.js → frekans grafiği çizme
+
+Audio recorder → öğrencinin alıştırma kaydı
+
+C) Etik ve kültürel boyut
+
+UNESCO tarafından “somut olmayan kültürel miras” olarak listelendiği için:
+
+Köylülerle röportaj,
+
+Orijinal konuşuculara telif/teşekkür,
+
+Kaydın kültürel bağlama uygun sunumu
+gibi unsurları eklemek iyi olur.
