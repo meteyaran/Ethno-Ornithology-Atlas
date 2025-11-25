@@ -410,7 +410,7 @@ export const birds: Bird[] = [
   {
     id: "32",
     name: "İnce Gagalı Martı",
-    scientificName: "Larus genei",
+    scientificName: "Chroicocephalus genei",
     region: ["Akdeniz", "Orta Doğu", "Asya"],
     size: "37-43 cm",
     colors: ["Beyaz", "Gri"],
