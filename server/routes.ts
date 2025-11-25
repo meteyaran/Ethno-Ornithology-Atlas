@@ -3,6 +3,45 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Audio file proxy endpoint to bypass CORS
+  app.get("/api/audio-proxy", async (req, res) => {
+    try {
+      const { url } = req.query;
+      
+      if (!url || typeof url !== 'string') {
+        return res.status(400).json({ error: "URL parameter required" });
+      }
+      
+      // Only allow xeno-canto URLs
+      if (!url.includes('xeno-canto.org')) {
+        return res.status(403).json({ error: "Only xeno-canto URLs allowed" });
+      }
+      
+      const audioUrl = url.startsWith('http') ? url : `https:${url}`;
+      
+      const response = await fetch(audioUrl, {
+        headers: {
+          'User-Agent': 'BirdEncyclopedia/1.0'
+        }
+      });
+      
+      if (!response.ok) {
+        return res.status(response.status).json({ error: "Failed to fetch audio" });
+      }
+      
+      // Set appropriate headers for audio streaming
+      res.setHeader('Content-Type', response.headers.get('content-type') || 'audio/mpeg');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      
+      // Pipe the audio stream to the response
+      const arrayBuffer = await response.arrayBuffer();
+      res.send(Buffer.from(arrayBuffer));
+    } catch (error) {
+      console.error("Error proxying audio:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   // Xeno-canto API v3 proxy endpoint for bird sounds
   app.get("/api/bird-sounds/:scientificName", async (req, res) => {
     try {

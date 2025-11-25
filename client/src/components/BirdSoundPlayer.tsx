@@ -15,6 +15,7 @@ export function BirdSoundPlayer({ scientificName, birdName }: BirdSoundPlayerPro
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [audioError, setAudioError] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
@@ -23,13 +24,19 @@ export function BirdSoundPlayer({ scientificName, birdName }: BirdSoundPlayerPro
     }
   }, [isMuted]);
 
+  useEffect(() => {
+    setAudioError(false);
+  }, [currentIndex]);
+
   const handlePlayPause = () => {
     if (!audioRef.current || !recordings || recordings.length === 0) return;
 
     if (isPlaying) {
       audioRef.current.pause();
     } else {
-      audioRef.current.play();
+      audioRef.current.play().catch(() => {
+        setAudioError(true);
+      });
     }
     setIsPlaying(!isPlaying);
   };
@@ -38,10 +45,16 @@ export function BirdSoundPlayer({ scientificName, birdName }: BirdSoundPlayerPro
     setIsPlaying(false);
   };
 
+  const handleAudioError = () => {
+    setAudioError(true);
+    setIsPlaying(false);
+  };
+
   const handleNextRecording = () => {
     if (!recordings) return;
     setCurrentIndex((prev) => (prev + 1) % recordings.length);
     setIsPlaying(false);
+    setAudioError(false);
   };
 
   if (isLoading) {
@@ -67,7 +80,11 @@ export function BirdSoundPlayer({ scientificName, birdName }: BirdSoundPlayerPro
   }
 
   const currentRecording = recordings[currentIndex];
-  const audioUrl = `https:${currentRecording.file}`;
+  // Use proxy endpoint to bypass CORS issues
+  const rawAudioUrl = currentRecording.file.startsWith('http') 
+    ? currentRecording.file 
+    : `https:${currentRecording.file}`;
+  const audioUrl = `/api/audio-proxy?url=${encodeURIComponent(rawAudioUrl)}`;
 
   return (
     <Card className="p-6">
@@ -135,12 +152,15 @@ export function BirdSoundPlayer({ scientificName, birdName }: BirdSoundPlayerPro
           onEnded={handleEnded}
           onPlay={() => setIsPlaying(true)}
           onPause={() => setIsPlaying(false)}
+          onError={handleAudioError}
         />
 
-        {currentRecording.sono && (
+        {currentRecording.sono && currentRecording.sono.small && (
           <div className="mt-4">
             <img
-              src={currentRecording.sono.small}
+              src={currentRecording.sono.small.startsWith('http') 
+                ? currentRecording.sono.small 
+                : `https:${currentRecording.sono.small}`}
               alt={`${birdName} sesinin spektrogramı`}
               className="w-full rounded-md border border-border"
             />
