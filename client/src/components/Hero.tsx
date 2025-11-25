@@ -16,14 +16,14 @@ export function Hero() {
       <div className="absolute inset-0 bg-gradient-to-b from-[#7a9d0f]/20 via-transparent to-background/40" />
       
       <div className="relative h-full flex flex-col items-center justify-center px-6 text-center">
-        <div className="max-w-4xl">
+        <div className="max-w-4xl bg-black/40 backdrop-blur-sm rounded-2xl px-8 py-10">
           <h1 
             className="font-serif text-5xl md:text-7xl font-bold text-white mb-6 tracking-wide leading-tight drop-shadow-2xl"
             data-testid="text-hero-title"
           >
             A'dan Z'ye Dünya Kuşları
           </h1>
-          <p className="text-white/95 text-base md:text-xl max-w-3xl mx-auto font-light leading-relaxed drop-shadow-lg">
+          <p className="text-white text-base md:text-xl max-w-3xl mx-auto font-light leading-relaxed">
             Kuşların izlenimlerini ve dilin izlerini aynı sayfada buluşturur. 
             Her kuş resmi bir kelimeye benzer; anlamı sabit değildir. 
             Renkler ışıkla değişir, kelimelerse bir bakışla.
