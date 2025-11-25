@@ -466,6 +466,141 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // eBird API - Get historical observations for a species with year/month filters
+  app.get("/api/ebird/historical/:speciesCode", async (req, res) => {
+    try {
+      const { speciesCode } = req.params;
+      const { startYear, endYear, startMonth, endMonth } = req.query;
+      const apiKey = process.env.EBIRD_API_KEY;
+      
+      if (!apiKey) {
+        return res.status(500).json({ error: "eBird API key not configured" });
+      }
+      
+      const sYear = parseInt(String(startYear)) || 2020;
+      const eYear = parseInt(String(endYear)) || new Date().getFullYear();
+      const sMonth = parseInt(String(startMonth)) || 1;
+      const eMonth = parseInt(String(endMonth)) || 12;
+      
+      // Major birding regions to sample from
+      const regions = [
+        'US-CA', 'US-TX', 'US-FL', 'US-NY', 'US-AZ', 'CA-ON', 'CA-BC', 'MX-OAX',
+        'BR-SP', 'AR-B', 'CO-ANT', 'PE-LIM', 'CL-RM',
+        'GB-ENG', 'DE-BY', 'FR-IDF', 'ES-AN', 'IT-25', 'TR-34', 'RU-MOW',
+        'ZA-GT', 'KE-NB', 'MA-11', 'EG-C',
+        'IN-MH', 'CN-31', 'JP-13', 'TH-10', 'ID-JK', 'AU-NSW', 'NZ-AUK',
+        'PH-00', 'VN-SG', 'MY-14', 'SG', 'TW-TPE', 'KR-11'
+      ];
+      
+      console.log(`Fetching historical eBird observations for ${speciesCode}: ${sYear}-${eYear}, months ${sMonth}-${eMonth}`);
+      
+      // Sample dates across the year range
+      const datesToQuery: {year: number, month: number, day: number}[] = [];
+      
+      // If querying all years (wide range), sample strategically
+      const yearRange = eYear - sYear;
+      
+      if (yearRange <= 5) {
+        // Query more dates for recent years
+        for (let year = sYear; year <= eYear; year++) {
+          for (let month = sMonth; month <= eMonth; month++) {
+            // Sample 2 dates per month
+            datesToQuery.push({ year, month, day: 10 });
+            datesToQuery.push({ year, month, day: 25 });
+          }
+        }
+      } else {
+        // For wider ranges, sample key years
+        const sampleYears = [sYear];
+        const step = Math.ceil(yearRange / 5);
+        for (let y = sYear + step; y < eYear; y += step) {
+          sampleYears.push(y);
+        }
+        sampleYears.push(eYear);
+        
+        for (const year of sampleYears) {
+          for (let month = sMonth; month <= eMonth; month++) {
+            datesToQuery.push({ year, month, day: 15 });
+          }
+        }
+      }
+      
+      // Limit to prevent too many API calls
+      const limitedDates = datesToQuery.slice(0, 24);
+      const limitedRegions = regions.slice(0, 12);
+      
+      // Create all requests
+      const requests: Promise<any[]>[] = [];
+      
+      for (const region of limitedRegions) {
+        for (const date of limitedDates) {
+          requests.push(
+            (async () => {
+              try {
+                const apiUrl = `https://api.ebird.org/v2/data/obs/${region}/historic/${date.year}/${date.month}/${date.day}?maxResults=50`;
+                const response = await fetch(apiUrl, {
+                  headers: {
+                    'X-eBirdApiToken': apiKey,
+                    'Accept': 'application/json'
+                  }
+                });
+                
+                if (response.ok) {
+                  const data = await response.json();
+                  // Filter for our species
+                  return data.filter((obs: any) => obs.speciesCode === speciesCode);
+                }
+                return [];
+              } catch {
+                return [];
+              }
+            })()
+          );
+        }
+      }
+      
+      // Execute in batches to avoid rate limiting
+      const batchSize = 20;
+      const allObservations: any[] = [];
+      
+      for (let i = 0; i < requests.length; i += batchSize) {
+        const batch = requests.slice(i, i + batchSize);
+        const results = await Promise.all(batch);
+        allObservations.push(...results.flat());
+        
+        // Small delay between batches
+        if (i + batchSize < requests.length) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+      }
+      
+      // Remove duplicates based on location
+      const uniqueLocations = new Map();
+      allObservations.forEach((obs: any) => {
+        if (obs.lat && obs.lng) {
+          const key = `${obs.lat.toFixed(2)}-${obs.lng.toFixed(2)}`;
+          if (!uniqueLocations.has(key)) {
+            uniqueLocations.set(key, obs);
+          }
+        }
+      });
+      
+      const observations = Array.from(uniqueLocations.values());
+      
+      console.log(`Found ${observations.length} unique historical observation locations for ${speciesCode}`);
+      
+      res.json({ 
+        observations, 
+        count: observations.length,
+        speciesCode,
+        dateRange: { startYear: sYear, endYear: eYear, startMonth: sMonth, endMonth: eMonth }
+      });
+    } catch (error) {
+      console.error("Error fetching historical observations:", error);
+      res.status(500).json({ error: "Internal server error", message: String(error) });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
