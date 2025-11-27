@@ -1,5 +1,9 @@
 # Ethno-Ornithology Atlas
 
+<p align="center">
+  <img src="attached_assets/ethno-ornithology-atlas-logo.png" alt="Ethno-Ornithology Atlas Logo" width="500">
+</p>
+
 ![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)
 ![Domain: Ethno--ornithology](https://img.shields.io/badge/Domain-Ethno--Ornithology-teal)
 ![Heritage: UNESCO](https://img.shields.io/badge/Heritage-UNESCO_Intangible_Culture-gold)
